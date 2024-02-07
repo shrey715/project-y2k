@@ -1,0 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Rubik+Glitch&family=VT323&display=swap');
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root{
+    --picture-background: url('../images/background.jpg');
+    --color-title: ;
+
+    --color-button: #7D0A0A;
+    --color-button-hover: ;
+
+    --color-text: #E4DEBE;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    /* justify-content: space-around; */
+    flex-direction: column;
+    align-items: center;
+    background-image: var(--picture-background);
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    overflow: hidden;
+}
+
+@keyframes glowing {
+    0% {
+        text-shadow: 0 0 10px #ff1493, 0 0 20px #ff1493, 0 0 30px #ff1493, 0 0 40px #ff1493, 0 0 50px #ff1493, 0 0 60px #ff1493, 0 0 70px #ff1493;
+    }
+    50% {
+        text-shadow: 0 0 10px #ff1493, 0 0 20px #ff1493, 0 0 30px #ff1493, 0 0 40px #ff1493, 0 0 50px #ff1493, 0 0 60px #ff1493, 0 0 70px #ff1493, 0 0 80px #ff1493, 0 0 90px #ff1493;
+    }
+    100% {
+        text-shadow: 0 0 10px #ff1493, 0 0 20px #ff1493, 0 0 30px #ff1493, 0 0 40px #ff1493, 0 0 50px #ff1493, 0 0 60px #ff1493, 0 0 70px #ff1493, 0 0 80px #ff1493, 0 0 90px #ff1493, 0 0 100px #ff1493;
+    }
+}
+
+#title {
+    font-family: 'VT323', monospace;
+    font-size: 30rem;
+    margin-bottom: 20px;
+    width: 100%;
+    text-align: center;
+    color: var(--color-title);
+    animation: glowing 3s infinite; /* Adjust the duration and other properties as needed */
+}
+
+.links-container{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 75px;
+    flex-direction: row;
+}
+
+.links-container a{
+    text-decoration: none;
+    font-family: 'Karla', sans-serif;
+    font-size: 20px;
+    margin: 0 20px;
+
+    color: var(--color-text);
+    background-color: var(--color-button);
+    border-radius: 10px;
+    padding: 10px 20px;
+}
+
+.links-container a:hover{
+    background-color: var(--);
+    transform: scale(1.1);
+    transition: all 0.5s ease-in-out;
+}
+
+.links-container a:active{
+    transform: scale(1.05);
+    transition: all 0.5s ease-in-out;
+}
+
+

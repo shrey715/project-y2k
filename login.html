@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Y2K Video Editor</title>
+    <link rel="stylesheet" href="assets/styles/loginstyle.css">
+</head>
+<body>
+    <div class="box">
+        <span class="borderLine"></span>
+        <form id="loginForm">
+            <h2>Login</h2>
+            <div class="inputBox">
+                <input type="text" name="username" id="username" required="">
+                <span>Username</span>
+                <i></i>
+            </div>
+            <div class="inputBox">
+                <input type="password" name="password" id="password" required="">
+                <span>Password</span>
+                <i></i>
+            </div>
+            <div class="links">
+                <a href="signup.html">Don't have an account? Sign Up</a>
+            </div>
+            <input type="button" value="Login" onclick="checkLogin()" class="login-button">
+        </form>
+    </div>
+
+    <script>
+        function checkLogin() {
+            var usernameInput = document.getElementById("username").value;
+            var passwordInput = document.getElementById("password").value;
+
+            if (usernameInput && passwordInput) {
+                var message;
+
+                if (usernameInput.toLowerCase() === "admin") {
+                    message = "Admin login success!";
+                } else {
+                    message = "Login success!";
+                }
+
+                alert(message);
+
+                setTimeout(function () {
+                    window.location.href = "home.html";
+                }, 1000); 
+            } else {
+                alert("Please enter both username and password.");
+            }
+        }
+    </script>
+</body>
+</html>
