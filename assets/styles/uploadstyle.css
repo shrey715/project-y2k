@@ -1,4 +1,4 @@
-.center {
+/*.center {
     text-align: center;
 }
 
@@ -35,7 +35,124 @@
 }    
 
 #imagePreview img {
-    /* width: 150px; */
     height: 200px;
     margin: 10px;
-}    
+}*/
+/* Reset some default styles */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap');
+body, html {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    font-family: 'Poppins', 'Helvetica';
+    background-color: #1c1c1c;
+}
+
+.center {
+    text-align: center;
+    color: whitesmoke;
+}
+
+#backButton {
+    background-color: whitesmoke;
+    color: #1c1c1c;
+    font-size: 1.2vw;
+    padding: 0.5vw 1.5vw;
+    border: none;
+    cursor: pointer;
+    border-radius: 2vw;
+    margin: 1vw;
+    transition: 0.75s ease;
+}
+
+#backButton:hover {
+    background-color: #ff2770;
+}
+
+/* Drop zone styles */
+#dropZone {
+    border: 0.4vw solid rgb(51, 8, 0);
+    border-radius: 2vw;
+    padding: 4vw;
+    text-align: center;
+    margin: 2vw auto;
+    background-color:#fdc8e5;
+    width: 80vw;
+    max-width: 50vw;
+    cursor: pointer;
+    color: rgb(51, 8, 0);
+    font-size: 1.1vw;
+}
+
+#dropZone:hover{
+    border: 0.4w solid #ff2770;
+}
+
+#dropZone i:hover{
+    color:#ff2770;
+    border: 0.4w solid #ff2770;
+}
+
+#dropZone i {
+    position: absolute;
+    top: 28%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2.7vw;
+    transition: 0.75s ease;
+}
+
+#dropZone span {
+    display: block; 
+    font-size: 1.5vw;
+    color: rgb(51, 8, 0);
+}
+
+#dropZone.highlight {
+    border-color:  #ff2770;
+}
+
+#imagePreview {
+    margin-top: 2vw;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* File input styles */
+#imageUpload {
+    display: none;
+}
+
+#dropZoneText {
+    font-size: 1.5vw;
+    color: #666;
+}
+
+/* Styling for the "Drop the image to upload" text */
+#dropZone.highlight #dropZoneText {
+    color: #4CAF50;
+}
+
+#imagePreview img {
+    margin: 2vw;
+    width: 15vw; /* Set a fixed width for uniformity */
+    height: 15vw; /* Set a fixed height for uniformity */
+    object-fit: cover; /* Crop the image to cover the specified dimensions */
+    border-radius: 2vw;
+    box-shadow: 0 0 1vw rgba(0, 0, 0, 0.2);
+}
+
+/* Ensure consistent aspect ratio */
+@media (max-width: 768px) {
+    #imagePreview img {
+        width: 90vw;
+        height: 90vw; /* Adjust height to maintain aspect ratio */
+    }
+}
+
+
+
