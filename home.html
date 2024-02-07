@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <style>
+        body{
+            margin: 0;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2vh 4vw;
+            background-color: #f0f0f0;
+            max-height: 3.5vh;
+            transition: padding 0.3s ease;
+        }
+
+        .logo img {
+            width: 10vw;
+            height: auto;
+            transition: width 0.3s ease;
+            margin-right: 60vw;
+        }
+
+        .user-details {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-details span {
+            margin-right: 2vw;
+            font-size: 2vw; /* Adjusted font size for responsiveness */
+            transition: margin-right 0.3s ease, font-size 0.3s ease; /* Added transitions for margin and font size */
+        }
+
+        .user-details img {
+            width: 4vw;
+            height: 4vw;
+            border-radius: 50%;
+            transition: width 0.3s ease; /* Added transition for profile photo width */
+        }
+
+        .upload-button {
+            padding: 1vh 2vw;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 2vw;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-right: 2vw;
+            font-size: 1vw; 
+            transition: padding 0.3s ease, font-size 0.3s ease; 
+        }
+
+        .menu-icon {
+            cursor: pointer;
+            margin-right: 2vw;
+            font-size: 2.5vw;
+        }
+
+        .collapse-icon {
+            cursor: pointer;
+            font-size: 2.5vw;
+            color: #ffffff;
+            display: none;
+        }
+
+        .menu {
+            position: fixed;
+            top: 0;
+            left: -300px; /* Initially off-screen */
+            width: 300px;
+            height: 100vh;
+            background-color: #333;
+            transition: left 0.3s ease;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .menu ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .menu li {
+            margin-bottom: 10px;
+        }
+
+        .menu a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2vh;
+            padding: 4vh 4vw;
+            transition: padding 0.3s ease;
+        }
+
+        .gallery img {
+            width: 100%;
+            height: auto;
+        }
+
+        .create-video-button {
+            padding: 1vh 1vw;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 1vw;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            margin: 2vh auto;
+            max-width: 5vw;
+            text-align: center;
+        }
+
+        /* Responsive styles */
+        @media screen and (max-width: 768px) {
+            .menu {
+                width: 200px;
+            }
+            .gallery {
+                padding: 2vh 2vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Menu -->
+    <div class="menu" id="menu">
+        <div class="collapse-icon" onclick="toggleMenu()">
+            <i class='bx bx-left-arrow-alt'></i>
+        </div>
+        <ul>
+            <li><a href="#">Home</a></li>
+            <li><a href="#">Video Editor</a></li>
+            <!-- Add more menu items as needed -->
+        </ul>
+    </div>
+
+    <!-- Header Section -->
+    <header>
+        <div class="menu-icon" onclick="toggleMenu()">
+            <i class='bx bx-menu'></i>
+        </div>
+        <div class="logo">
+            <img src="" alt="Y2K Logo">
+        </div>
+        <span></span>
+        <div class="user-details">
+            <!-- Upload Images Button -->
+            <a href="upload_images.html" class="upload-button">Upload Images</a>
+            <!-- User profile photo will be displayed here -->
+            <img src="" alt="Profile Photo">
+        </div>
+    </header>
+
+    <!-- Body Section -->
+    <section class="gallery">
+        <!-- Display uploaded images here -->
+        <!-- Placeholder for images -->
+        <div class="image">
+            <img src="uploaded_image1.jpg" alt="Image 1">
+        </div>
+        <div class="image">
+            <img src="uploaded_image2.jpg" alt="Image 2">
+        </div>
+        <div class="image">
+            <img src="uploaded_image3.jpg" alt="Image 3">
+        </div>
+        <div class="image">
+            <img src="uploaded_image4.jpg" alt="Image 4">
+        </div>
+        <div class="image">
+            <img src="uploaded_image5.jpg" alt="Image 5">
+        </div>
+        <div class="image">
+            <img src="uploaded_image6.jpg" alt="Image 6">
+        </div>
+        <div class="image">
+            <img src="uploaded_image7.jpg" alt="Image 7">
+        </div>
+        <div class="image">
+            <img src="uploaded_image8.jpg" alt="Image 8">
+        </div>
+        <div class="image">
+            <img src="uploaded_image9.jpg" alt="Image 9">
+        </div>
+    </section>
+
+    <!-- Button for creating a video -->
+    <a href="#" class="create-video-button">Create Video</a>
+
+    <script>
+        function toggleMenu() {
+            var menu = document.getElementById("menu");
+            var menuIcon = document.querySelector(".menu-icon");
+            var collapseIcon = document.querySelector(".collapse-icon");
+            if (menu.style.left === "0px") {
+                menu.style.left = "-300px";
+                menuIcon.style.display = "block";
+                collapseIcon.style.display = "none";
+                document.querySelector('.gallery').style.padding = '4vh 4vw';
+                document.querySelector('header').style.padding = '2vh 4vw';
+            } else {
+                menu.style.left = "0px";
+                menuIcon.style.display = "none";
+                collapseIcon.style.display = "block";
+                document.querySelector('.gallery').style.padding = '4vh 22vw';
+                document.querySelector('header').style.padding = '2vh 22vw';
+            }
+        }
+    </script>
+</body>
+</html>
