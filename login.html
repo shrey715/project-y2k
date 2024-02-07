@@ -24,6 +24,7 @@
             <div class="links">
                 <a href="signup.html">Don't have an account? Sign Up</a>
             </div>
+            <div id="attempt-msg"></div>
             <input type="button" value="Login" onclick="checkLogin()" class="login-button">
         </form>
     </div>
@@ -34,21 +35,28 @@
             var passwordInput = document.getElementById("password").value;
 
             if (usernameInput && passwordInput) {
-                var message;
+                var message = "Failed to login!";
+                var color = "red";
 
                 if (usernameInput.toLowerCase() === "admin") {
                     message = "Admin login success!";
+                    color = "green";
                 } else {
                     message = "Login success!";
+                    color = "green";
                 }
 
-                alert(message);
+                var attempt = document.getElementById("attempt-msg");
+                attempt.style.color = color;
+                attempt.innerHTML = message;
 
                 setTimeout(function () {
                     window.location.href = "home.html";
                 }, 1000); 
             } else {
-                alert("Please enter both username and password.");
+                var attempt = document.getElementById("attempt-msg");
+                attempt.style.color = "red";
+                attempt.innerHTML = "Please fill in all fields!";
             }
         }
     </script>
