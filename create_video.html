@@ -7,7 +7,6 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="assets/styles/homestyle.css">
     <style>
-        /* CSS styles for buttons, header, and gallery */
         body {
             margin: 0;
             padding: 0;
@@ -119,12 +118,70 @@
         }
 
         .upload-music-button:hover {
+            transform: scale(1.05);
             background-color: #0056b3;
         }
         
         #musicUpload {
             display: none;
         }
+
+        #videoResolution, #videoQuality, #videoFps {
+            width: 100%;
+            padding: 10px 10px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+
+            option{
+                padding: 10px 10px;
+                border: none;
+                border-radius: 10px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+        }
+
+        #imageDuration {
+            width: 100%;
+            padding: 10px 10px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #transitionEffect {
+            width: 100%;
+            padding: 10px 10px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #transitionEffect:hover {
+            background-color: #333;
+        }
+
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+
+
     </style>
 </head>
 <body>
@@ -160,7 +217,7 @@
 
     <!-- Video Preview Section -->
     <div class="video-preview-container">
-        <video id="videoPreview" controls>
+        <video id="videoPreview" controls="">
             <source src="assets/video/preview/video1.mp4" type="video/mp4">
             Your browser does not support the video tag.
         </video>
@@ -206,7 +263,7 @@
             </div>
         </div>
 
-        <!-- Export Video Button -->
+        <button id="prev-button" onclick="playPreview()">Preview Video</button>
         <button onclick="toggleExportOptions()">Export Video</button>
     </div>
 
@@ -234,6 +291,12 @@
             } else {
                 exportOptions.style.display = "none";
             }
+        }
+
+        function playPreview() {
+            var video = document.getElementById("videoPreview");
+            var button = document.getElementById("prev-button");
+            video.play();
         }
     </script>
 </body>
