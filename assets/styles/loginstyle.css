@@ -101,6 +101,8 @@ body{
     transform-origin: bottom right;
     animation: borderimate 6s linear infinite;
     animation-delay: -3s;
+
+    filter: blur(20px);
 }
 
 .borderLine{
@@ -137,6 +139,8 @@ body{
     transform-origin: bottom right;
     animation: borderimate 6s linear infinite;
     animation-delay: -4.5s;
+
+    filter: blur(20px);
 }
 
 @keyframes borderimate {
