@@ -124,5 +124,13 @@
             </div>
         </div>
         <script src="{{ url_for('static', filename='scripts/script.js') }}"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                setTimeout(function () {
+                    document.querySelector(".loading-page").style.display = "none";
+                    document.querySelector(".main-content").style.display = "flex";
+                }, 2000);
+            });
+        </script>
     </body>
 </html>

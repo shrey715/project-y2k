@@ -1,22 +1,15 @@
-document.addEventListener("DOMContentLoaded", function () {
-    setTimeout(function () {
-        document.querySelector(".loading-page").style.animation = "exit 1s ease-in-out";
-        document.querySelector(".loading-page").style.display = "none";
-        document.querySelector(".main-content").style.display = "flex";
-    }, 2000); 
-});
-
-function toggleMenu(){
+function toggleMenu() {
     var navtexts = document.getElementsByClassName("nav-text");
     var navbutton = document.getElementById("sidebar-btn");
 
-    for(var i=0;i<navtexts.length;i++){
+    for (var i = 0; i < navtexts.length; i++) {
         navtexts[i].classList.toggle("show-nav-text");
     }
 
     navbutton.classList.toggle('bxs-chevrons-left');
     navbutton.classList.toggle('bxs-chevrons-right');
 }
+
 function checkLogin() {
     var usernameInput = document.getElementById("username").value;
     var passwordInput = document.getElementById("password").value;
@@ -24,7 +17,7 @@ function checkLogin() {
     if (!usernameInput || !passwordInput) {
         var attempt = document.getElementById("attempt-msg");
         attempt.style.color = "red";
-        attempt.innerHTML = "Please enter both username and password!";
+        attempt.innerHTML = "Please fill in all fields!";
         return;
     }
 
@@ -45,7 +38,25 @@ function checkLogin() {
         attempt.innerHTML = data.message;
 
         if (data.authenticated) {
-            window.location.href = "/dashboard";
+            localStorage.setItem('jwtToken', data.access_token);
+            setTimeout(function() {
+                fetch(`/dashboard/${usernameInput}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${data.access_token}`,
+                        'Content-Type': 'application/json'
+                    },
+                })
+                .then(response => response.json())
+                .then(dashboardData => {
+                    console.log(dashboardData);
+                })
+                .catch(error => {
+                    console.error('Error fetching dashboard data:', error);
+                });
+
+                window.location.replace(`/${usernameInput}/dashboard`);
+            }, 2000);
         }
     })
     .catch((error) => {
@@ -85,7 +96,7 @@ function checkSignup() {
         if (data.authenticated) {
             setTimeout(function() {
                 window.location.replace("/login");
-            }, 2000); 
+            }, 2000);
         }
         else if (data.message.includes("Email is already taken")) {
             document.getElementById("email").value = "";
