@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login | Y2K Video Editor</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <link rel="icon" href="assets/images/logo-no-text.png" type="image/x-icon">
+    <link rel="icon" href={{url_for('static',filename='images/logo-no-text.png')}} type="image/x-icon">
     <link rel="stylesheet" href={{url_for('static',filename='styles/loginstyle.css')}}>
 </head>
 <body>
@@ -113,7 +113,7 @@
     </div>
     <div class="box">
         <span class="borderLine"></span>
-        <form id="loginForm" method="post">
+        <form id="loginForm" method="post" action="/login">
             <h2>Login</h2>
             <div class="inputBox">
                 <input type="text" name="username" id="username" required="">
@@ -129,7 +129,7 @@
                 <a href={{ url_for('signup') }}>Don't have an account? Sign Up</a>
             </div>
             <div id="attempt-msg"></div>
-            <input type="button" value="Login" onclick="checkLogin()" class="login-button">
+            <input type="submit" value="Login" class="login-button">
         </form>
     </div>
 

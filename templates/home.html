@@ -7,7 +7,7 @@
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-        <link rel="icon" href="assets/images/logo-no-text.png" type="image/x-icon">
+        <link rel="icon" href={{url_for('static',filename='images/logo-no-text.png')}} type="image/x-icon">
         <link rel="stylesheet" href={{url_for('static',filename='styles/homestyle.css')}}>
     </head>
     <body>
@@ -17,7 +17,7 @@
             </button>
             <ul class="sidebar-nav">
                 <li class="sidebar-nav-item">
-                    <a href={{ url_for('dashboard') }}>
+                    <a href={{ url_for('user_dashboard', username=username) }}>
                         <i class='bx bx-home-alt-2' ></i>
                         <span class="nav-text">Home</span>
                     </a>

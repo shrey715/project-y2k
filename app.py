@@ -10,6 +10,7 @@ app.config['JWT_SECRET_KEY'] = 'super-secret'
 app.config['JWT_COOKIE_SECURE'] = False
 app.secret_key = 'ullabritasmitafrita'
 app.config['JWT_ACCESS_COOKIE_PATH'] = '/user'
+session={'authenticated': False,'username': ''}
 
 jwt = JWTManager(app)
 
@@ -39,8 +40,7 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if session['authenticated']:
-        return redirect('/dashboard')
-
+        return redirect(f'/user_dashboard/{session["username"]}')
     if request.method == 'POST':
         try:
             data = request.form
@@ -50,28 +50,31 @@ def login():
             if not username or not password:
                 return jsonify(authenticated=False, message="Please fill in all fields")
 
-            if username is 'admin' and password is 'admin':
-                session['authenticated'] = True
-                return redirect('admin/users_list')
-
             with connection.cursor() as cursor:
-                sql_check_user = "SELECT * FROM users WHERE username = %s AND password = %s"
-                hashed_password = hashlib.sha256(password.encode()).hexdigest()
-                cursor.execute(sql_check_user, (username, hashed_password))
-                result_user = cursor.fetchone()
+                sql_check_user = "SELECT * FROM users WHERE username = %s"
+                cursor.execute(sql_check_user, (username,))
+                result = cursor.fetchone()
 
-                if result_user:
-                    session['authenticated'] = True
+                if not result:
+                    return jsonify(authenticated=False, message="Username does not exist")
+
+                hashed_password = hashlib.sha256(password.encode()).hexdigest()                
+                if result['password'] == hashed_password:
                     access_token = create_access_token(identity=username, expires_delta=timedelta(days=7))
+                    print(access_token)
                     decoded = decode_token(access_token)
-                    response = make_response(redirect(url_for('/'+username+'/dashboard')))
+                    print(decoded)
+                    response = make_response(redirect(url_for('user_dashboard', username=username)))
+                    response.set_cookie('access_token_cookie', value=access_token, max_age=3600, httponly=True, path='/')
+                    print("Response header", response.headers)
+                    session['authenticated'] = True
+                    session['username'] = username
+                    return response
                 else:
-                    return jsonify(authenticated=False, message="Invalid username or password")
-
+                    return jsonify(authenticated=False, message="Incorrect password")
         except Exception as e:
             print("Error:", e)
-            return jsonify(authenticated=False, message="Failed to login")
-
+            return jsonify(authenticated=False, message="Failed to login")                    
     return render_template('login.html')
 
 @app.route('/signup', methods=['POST','GET'])
@@ -113,21 +116,23 @@ def signup():
 
     return render_template('signup.html')
 
-@app.route('/<username>/dashboard', methods=['GET'])
+@app.route('/user_dashboard/<username>', methods=['GET'])
 @jwt_required()
 def user_dashboard(username):
     current_user = get_jwt_identity()
+    print(current_user)
     if current_user != username:
-        return jsonify(message="Unauthorized"), 403
-
-    return render_template('home.html')
-
+        print("Error: Current user does not match requested user.")
+        abort(403)
+    return render_template('home.html',username=username)
 
 @app.route('/video_editor', methods=['GET'])
+@jwt_required()
 def video_editor():
     return render_template('create_video.html')
 
 @app.route('/upload_images', methods=['GET'])
+@jwt_required()
 def upload_images():
     return render_template('upload_images.html')
 
