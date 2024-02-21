@@ -8,7 +8,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
         <link rel="icon" href="assets/images/logo-no-text.png" type="image/x-icon">
-        <link rel="stylesheet" href="../static/styles/homestyle.css">
+        <link rel="stylesheet" href={{url_for('static',filename='styles/homestyle.css')}}>
     </head>
     <body>
         <nav class="sidebar">
@@ -17,19 +17,19 @@
             </button>
             <ul class="sidebar-nav">
                 <li class="sidebar-nav-item">
-                    <a href="home.html">
+                    <a href={{ url_for('dashboard') }}>
                         <i class='bx bx-home-alt-2' ></i>
                         <span class="nav-text">Home</span>
                     </a>
                 </li>
                 <li class="sidebar-nav-item">
-                    <a href="create_video.html">
+                    <a href={{ url_for('video_editor') }}>
                         <i class='bx bx-video-plus' ></i>
                         <span class="nav-text">Video Editor</span>
                     </a>
                 </li>
                 <li class="sidebar-nav-item">
-                    <a href="upload_images.html">
+                    <a href={{ url_for('upload_images') }}>
                         <i class='bx bx-image' ></i>
                         <span class="nav-text">Upload Images</span>
                     </a>
@@ -39,6 +39,6 @@
         <div class="main-content">
             
         </div>
-        <script src="script.js" async defer></script>
+        <script src="{{ url_for('static', filename='scripts/script.js') }}" async defer></script>
     </body>
 </html>
