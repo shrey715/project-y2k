@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, make_response, abort, session, jsonify
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, decode_token
 from datetime import timedelta
-from flask_wtf.csrf import CSRFProtect
+from flask_wtf.csrf import CSRFProtect, generate_csrf
 from werkzeug.utils import secure_filename
 import pymysql  
 import hashlib
@@ -13,6 +13,8 @@ app.config['JWT_SECRET_KEY'] = 'super-secret'
 app.config['JWT_COOKIE_SECURE'] = False
 app.secret_key = 'ullabritasmitafrita'
 app.config['JWT_ACCESS_COOKIE_PATH'] = '/user'
+app.config['JWT_COOKIE_CSRF_PROTECT'] = False
+app.config['SESSION_COOKIE_DOMAIN'] = 'localhost' 
 session={'authenticated': False,'username': ''}
 jwt = JWTManager(app)
 csrf = CSRFProtect(app)
@@ -71,6 +73,7 @@ def login():
                     response.set_cookie('access_token_cookie', value=access_token, max_age=3600, httponly=True, path='/')
                     session['authenticated'] = True
                     session['username'] = username
+                    
                     return response
                 else:
                     return jsonify(authenticated=False, message="Incorrect password")
@@ -124,7 +127,6 @@ def user_dashboard(username):
     if session['authenticated'] == False:
         return redirect('/login')
     current_user = get_jwt_identity()
-    print(current_user)
     if current_user != username:
         print("Error: Current user does not match requested user.")
         abort(403)
@@ -141,6 +143,7 @@ def user_dashboard(username):
 
 @app.route('/get_image/<image_id>', methods=['GET'])
 @jwt_required()
+@csrf.exempt
 def get_image(image_id):
     if session['authenticated'] == False:
         return redirect('/login')
@@ -162,14 +165,15 @@ def get_image(image_id):
             
 @app.route('/video_editor', methods=['GET'])
 @jwt_required()
+@csrf.exempt
 def video_editor():
     if session['authenticated'] == False:
         return redirect('/login')
     return render_template('create_video.html',username=session['username'])
 
 @app.route('/upload', methods=['GET','POST'])
-@csrf.exempt
 @jwt_required()
+@csrf.exempt
 def upload():
     if session['authenticated'] == False:
         return redirect('/login')
@@ -184,6 +188,9 @@ def upload():
 
             files = request.files.getlist(file_type)
 
+            if not files:
+                return jsonify(success=False, message="No files uploaded")
+
             username = session.get('username')
             user_id = None
             
@@ -193,15 +200,17 @@ def upload():
                 user_id = cursor.fetchone()['user_id']
 
             for file in files:
+                print(1)
                 filename = secure_filename(file.filename)
                 file_data = file.read()
                 file_metadata = file.content_type
-
                 table_name = f"{file_type}s" 
                 
                 with connection.cursor() as cursor:
                     sql_insert_file = f"INSERT INTO {table_name} (filename, user_id, {file_type}, metadata) VALUES (%s, %s, %s, %s)"
                     cursor.execute(sql_insert_file, (filename, user_id, file_data, file_metadata))
+                    print("File uploaded")
+                    print(sql_insert_file, (filename, user_id, file_data, file_metadata))
                     connection.commit()
 
             return jsonify(success=True, message="Files uploaded successfully")
