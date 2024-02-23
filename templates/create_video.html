@@ -1,303 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Video</title>
-    <link rel="icon" href={{url_for('static',filename='images/logo-no-text.png')}} type="image/x-icon">
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            background-color: #242424;
-            color: whitesmoke;
-        }
-
-        header {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 2vh 4vw;
-            background: linear-gradient(to right, #45f3ff, #ff2770);
-            z-index: 999;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .menu-icon, .collapse-icon {
-            cursor: pointer;
-            font-size: 3vh;
-        }
-
-        .menu-icon i {
-            margin-right: 1vh;
-            /* color: #fff; */
-        }
-
-        .collapse-icon i {
-            color: #ffffff;
-        }
-
-        .menu {
-            position: fixed;
-            top: 0;
-            left: -30vh;
-            width: 30vh;
-            height: 100vh;
-            background-color: #333;
-            transition: left 0.3s ease;
-            z-index: 1000;
-            padding: 2vh 2vh;
-        }
-
-        .menu ul {
-            list-style-type: none;
-            padding: 0;
-        }
-
-        .menu li {
-            margin-bottom: 2vh;
-        }
-
-        .menu a {
-            color: #fff;
-            text-decoration: none;
-        }
-
-        .menu a:hover {
-            text-decoration: underline;
-        }
-
-        .video-preview-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 20vh;
-        }
-
-        video {
-            width: 50vw;
-            height: auto;
-            margin-bottom: 4vh;
-        }
-
-        .options-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .option {
-            margin-bottom: 2vh;
-        }
-
-        .john-doe {
-            color: #dddddd;
-            margin-right: 2vw;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-        }
-        
-        .upload-music-button {
-            display: inline-block;
-            text-align: center;
-            margin-right: 15vw;
-            padding: 10px 10px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .upload-music-button:hover {
-            transform: scale(1.05);
-            background-color: #0056b3;
-        }
-        
-        #musicUpload {
-            display: none;
-        }
-
-        #videoResolution, #videoQuality, #videoFps {
-            width: 100%;
-            padding: 10px 10px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-
-            option{
-                padding: 10px 10px;
-                border: none;
-                border-radius: 10px;
-                cursor: pointer;
-                transition: background-color 0.3s ease;
-            }
-        }
-
-        #imageDuration {
-            width: 100%;
-            padding: 10px 10px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        #transitionEffect {
-            width: 100%;
-            padding: 10px 10px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        #transitionEffect:hover {
-            background-color: #333;
-        }
-
-        button {
-            margin: 10px;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-            transform: scale(1.05);
-        }
-
-
-    </style>
-</head>
-<body>
-    <!-- Navigation Menu -->
-    <div class="menu" id="menu">
-        <div class="collapse-icon" onclick="toggleMenu()">
-            <i class='bx bx-left-arrow-alt'></i>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Video Editor</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+        <link rel="icon" href={{url_for('static',filename='images/logo-no-text.png')}} type="image/x-icon">
+        <link rel="stylesheet" href={{url_for('static',filename='styles/homestyle.css')}}>
+    </head>
+    <body>
+        <nav class="sidebar">
+            <ul class="sidebar-nav">
+                <div class="sidebar-logo">
+                    <img src={{url_for('static',filename='images/logo-no-text.png')}} alt="logo">
+                </div>
+                <button class="sidebar-close" onclick="toggleMenu()">
+                    <i  id="sidebar-btn" class='bx bxs-chevrons-right'></i>
+                </button>
+                <li class="sidebar-nav-item">
+                    <a href={{ url_for('user_dashboard', username=username) }}>
+                        <i class='bx bx-home-alt-2' ></i>
+                        <span class="nav-text">Home</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href={{ url_for('video_editor') }}>
+                        <i class='bx bx-video-plus' ></i>
+                        <span class="nav-text">Video Editor</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href={{ url_for('upload') }}>
+                        <i class='bx bx-image' ></i>
+                        <span class="nav-text">Upload Images/Audio</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#">
+                        <i class='bx bxs-user-circle'></i>
+                        <span class="nav-text">Profile</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <div class="main-content">
+            
         </div>
-        <ul>
-            <li><a href="signup.html">Sign Up</a></li>
-            <li><a href="login.html">Log In</a></li>
-            <li><a href="home.html">Home</a></li>
-            <li><a href="#">Create Video</a></li>
-        </ul>
-    </div>
-
-    <!-- Header Section -->
-    <header>
-        <div class="menu-icon" onclick="toggleMenu()">
-            <i class='bx bx-menu'></i>
-        </div>
-        <div class="logo">
-            <img src="assets/images/y2k_logo.png" alt="Y2K Logo">
-        </div>
-        <!-- <span class="john-doe">Hello, John Doe</span> -->
-        <div class="user-details">
-            <label for="musicUpload" class="upload-music-button">Upload Music</label>
-            <input type="file" id="musicUpload" accept="audio/*" style="display: none;">
-            <!-- <img src="profile_photo.jpg" alt="Profile Photo"> -->
-            <i class='bx bx-user profile-pic'></i>
-        </div>
-    </header>
-
-    <!-- Video Preview Section -->
-    <div class="video-preview-container">
-        <video id="videoPreview" controls="">
-            <source src="assets/video/preview/video1.mp4" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
-        <div class="options-container">
-            <!-- Transition Effects -->
-            <div class="option">
-                <label for="transitionEffect">Transition Effect:</label>
-                <select id="transitionEffect">
-                    <option value="fade">Fade</option>
-                    <option value="slide">Slide</option>
-                    <option value="zoom">Zoom</option>
-                </select>
-            </div>
-
-            <!-- Image Duration -->
-            <div class="option">
-                <label for="imageDuration">Image Duration (seconds):</label>
-                <input type="number" id="imageDuration" min="1" value="3">
-            </div>
-
-            <!-- Export Options (Hidden by Default) -->
-            <div class="option export-options" style="display: none;">
-                <label for="videoResolution">Video Resolution:</label>
-                <select id="videoResolution">
-                    <option value="1080p">1080p</option>
-                    <option value="720p">720p</option>
-                    <option value="480p">480p</option>
-                </select>
-
-                <label for="videoQuality">Video Quality:</label>
-                <select id="videoQuality">
-                    <option value="high">High</option>
-                    <option value="medium">Medium</option>
-                    <option value="low">Low</option>
-                </select>
-
-                <label for="videoFps">Video FPS:</label>
-                <select id="videoFps">
-                    <option value="30">30 FPS</option>
-                    <option value="60">60 FPS</option>
-                    <option value="24">24 FPS</option>
-                </select>
-            </div>
-        </div>
-
-        <button id="prev-button" onclick="playPreview()">Preview Video</button>
-        <button onclick="toggleExportOptions()">Export Video</button>
-    </div>
-
-    <!-- Script for toggling menu and export options -->
-    <script>
-        function toggleMenu() {
-            var menu = document.getElementById("menu");
-            var menuIcon = document.querySelector(".menu-icon");
-            var collapseIcon = document.querySelector(".collapse-icon");
-            if (menu.style.left === "0px") {
-                menu.style.left = "-30vh";
-                menuIcon.style.display = "block";
-                collapseIcon.style.display = "none";
-            } else {
-                menu.style.left = "0px";
-                menuIcon.style.display = "none";
-                collapseIcon.style.display = "block";
-            }
-        }
-
-        function toggleExportOptions() {
-            var exportOptions = document.querySelector(".export-options");
-            if (exportOptions.style.display === "none") {
-                exportOptions.style.display = "block";
-            } else {
-                exportOptions.style.display = "none";
-            }
-        }
-
-        function playPreview() {
-            var video = document.getElementById("videoPreview");
-            var button = document.getElementById("prev-button");
-            video.play();
-        }
-    </script>
-</body>
+        <script src="{{ url_for('static', filename='scripts/script.js') }}" async defer></script>
+    </body>
 </html>

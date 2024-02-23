@@ -1,8 +1,11 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, make_response, abort, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, make_response, abort, session, jsonify
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, decode_token
 from datetime import timedelta
+from flask_wtf import FlaskForm, CSRFProtect
+from wtforms import FileField, SubmitField
 import pymysql
 import hashlib
+import base64
 
 app=Flask(__name__)
 app.config["JWT_TOKEN_LOCATION"] = ["headers", "cookies", "json", "query_string"]
@@ -11,7 +14,6 @@ app.config['JWT_COOKIE_SECURE'] = False
 app.secret_key = 'ullabritasmitafrita'
 app.config['JWT_ACCESS_COOKIE_PATH'] = '/user'
 session={'authenticated': False,'username': ''}
-
 jwt = JWTManager(app)
 
 try: 
@@ -30,7 +32,9 @@ except Exception as e:
     with connection.cursor() as cursor:
         cursor.execute('CREATE DATABASE y2k_database')
         cursor.execute('USE y2k_database')
-        cursor.execute('CREATE TABLE users (id INT AUTO_INCREMENT PRIMARY KEY, username VARCHAR(100) UNIQUE, password VARCHAR(100), email VARCHAR(100) UNIQUE)')
+        cursor.execute('CREATE TABLE users (user_id INT PRIMARY KEY AUTO_INCREMENT, username VARCHAR(100) UNIQUE, email VARCHAR(100) UNIQUE, password VARCHAR(64));')
+        cursor.execute('CREATE TABLE images (image_id INT PRIMARY KEY AUTO_INCREMENT, filename VARCHAR(255), user_id INT, image LONGBLOB, metadata TEXT, FOREIGN KEY (user_id) REFERENCES users(user_id));')
+        cursor.execute('CREATE TABLE audios (audio_id INT PRIMARY KEY AUTO_INCREMENT, filename VARCHAR(255), user_id INT, audio LONGBLOB, metadata TEXT, FOREIGN KEY (user_id) REFERENCES users(user_id));')
         connection.commit()
 
 @app.route('/')
@@ -61,12 +65,9 @@ def login():
                 hashed_password = hashlib.sha256(password.encode()).hexdigest()                
                 if result['password'] == hashed_password:
                     access_token = create_access_token(identity=username, expires_delta=timedelta(days=7))
-                    print(access_token)
                     decoded = decode_token(access_token)
-                    print(decoded)
                     response = make_response(redirect(url_for('user_dashboard', username=username)))
                     response.set_cookie('access_token_cookie', value=access_token, max_age=3600, httponly=True, path='/')
-                    print("Response header", response.headers)
                     session['authenticated'] = True
                     session['username'] = username
                     return response
@@ -119,22 +120,108 @@ def signup():
 @app.route('/user_dashboard/<username>', methods=['GET'])
 @jwt_required()
 def user_dashboard(username):
+    if session['authenticated'] == False:
+        return redirect('/login')
     current_user = get_jwt_identity()
     print(current_user)
     if current_user != username:
         print("Error: Current user does not match requested user.")
         abort(403)
-    return render_template('home.html',username=username)
+    images = []
+    with connection.cursor() as cursor:
+        sql_get_user_id = "SELECT user_id FROM users WHERE username = %s"
+        cursor.execute(sql_get_user_id, (username,))
+        user_id = cursor.fetchone()['user_id']
 
+        sql_get_images = "SELECT * FROM images WHERE user_id = %s"
+        cursor.execute(sql_get_images, (user_id,))
+        images = cursor.fetchall()
+    return render_template('home.html', username=username, images=images)
+
+@app.route('/get_image/<image_id>', methods=['GET'])
+@jwt_required()
+def get_image(image_id):
+    if session['authenticated'] == False:
+        return redirect('/login')
+    try:
+        with connection.cursor() as cursor:
+            sql_get_image = "SELECT * FROM images WHERE image_id = %s"
+            cursor.execute(sql_get_image, (image_id,))
+            image = cursor.fetchone()
+            
+            if image:
+                image_data = image['image']
+                headers = {'Content-Type': 'image/' + image['filename'].split('.')[-1]} 
+                return make_response(image_data, 200, headers)
+            else:
+                return jsonify(success=False, message="Image not found")
+    except Exception as e:
+        print("Error:", e)
+        return jsonify(success=False, message="Failed to get image")
+            
 @app.route('/video_editor', methods=['GET'])
 @jwt_required()
 def video_editor():
-    return render_template('create_video.html')
+    if session['authenticated'] == False:
+        return redirect('/login')
+    return render_template('create_video.html',username=session['username'])
 
-@app.route('/upload_images', methods=['GET'])
+@app.route('/upload', methods=['GET', 'POST'])
 @jwt_required()
-def upload_images():
-    return render_template('upload_images.html')
+def upload():
+    if session['authenticated'] == False:
+        return redirect('/login')
+    return render_template('upload.html',username=session['username'])
+
+@app.route('/upload_image', methods=['POST'])
+@jwt_required()
+def upload_image():
+    if session['authenticated'] == False:
+        return redirect('/login')
+    try:
+        data = request.form
+        username = data['username']
+        file = request.files['file']
+        filename = file.filename
+        image = file.read()
+        metadata = data['metadata']
+        with connection.cursor() as cursor:
+            sql_get_user_id = "SELECT user_id FROM users WHERE username = %s"
+            cursor.execute(sql_get_user_id, (username,))
+            user_id = cursor.fetchone()['user_id']
+
+            sql_insert_image = "INSERT INTO images (filename, user_id, image, metadata) VALUES (%s, %s, %s, %s)"
+            cursor.execute(sql_insert_image, (filename, user_id, image, metadata))
+            connection.commit()
+        return jsonify(success=True, message="Image uploaded successfully")
+    except Exception as e:
+        print("Error:", e)
+        return jsonify(success=False, message="Failed to upload image")
+    
+@app.route('/upload_audio', methods=['POST'])
+@jwt_required()
+def upload_audio():
+    if session['authenticated'] == False:
+        return redirect('/login')
+    try:
+        data = request.form
+        username = data['username']
+        file = request.files['file']
+        filename = file.filename
+        audio = file.read()
+        metadata = data['metadata']
+        with connection.cursor() as cursor:
+            sql_get_user_id = "SELECT user_id FROM users WHERE username = %s"
+            cursor.execute(sql_get_user_id, (username,))
+            user_id = cursor.fetchone()['user_id']
+
+            sql_insert_audio = "INSERT INTO audios (filename, user_id, audio, metadata) VALUES (%s, %s, %s, %s)"
+            cursor.execute(sql_insert_audio, (filename, user_id, audio, metadata))
+            connection.commit()
+        return jsonify(success=True, message="Audio uploaded successfully")
+    except Exception as e:
+        print("Error:", e)
+        return jsonify(success=False, message="Failed to upload audio")
 
 if __name__ == '__main__':
     app.run(port=5001, debug=True)
