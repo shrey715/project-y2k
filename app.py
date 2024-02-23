@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, make_respo
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, decode_token
 from datetime import timedelta
 from flask_wtf.csrf import CSRFProtect
+from werkzeug.utils import secure_filename
 import pymysql  
 import hashlib
 import base64
@@ -15,7 +16,6 @@ app.config['JWT_ACCESS_COOKIE_PATH'] = '/user'
 session={'authenticated': False,'username': ''}
 jwt = JWTManager(app)
 csrf = CSRFProtect(app)
-csrf.init_app(app)
 
 try: 
     connection = pymysql.connect(host='localhost',
@@ -49,7 +49,7 @@ def login():
     if request.method == 'POST':
         try:
             data = request.form
-            username = data['username']
+            username = data['username'] 
             password = data['password']
 
             if not username or not password:
@@ -167,62 +167,50 @@ def video_editor():
         return redirect('/login')
     return render_template('create_video.html',username=session['username'])
 
-@app.route('/upload', methods=['GET', 'POST'])
+@app.route('/upload', methods=['GET','POST'])
+@csrf.exempt
 @jwt_required()
 def upload():
     if session['authenticated'] == False:
         return redirect('/login')
-    return render_template('upload.html',username=session['username'])
+    if request.method == 'GET':
+        return render_template('upload.html', username=session['username'])
+    if request.method == 'POST':
+        try:
+            file_type = request.form.get('file_type')
+            
+            if file_type not in ['image', 'audio']:
+                return jsonify(success=False, message="Invalid file type")
 
-@app.route('/upload_image', methods=['POST'])
-@jwt_required()
-def upload_image():
-    if session['authenticated'] == False:
-        return redirect('/login')
-    try:
-        data = request.form
-        username = data['username']
-        file = request.files['file']
-        filename = file.filename
-        image = file.read()
-        metadata = data['metadata']
-        with connection.cursor() as cursor:
-            sql_get_user_id = "SELECT user_id FROM users WHERE username = %s"
-            cursor.execute(sql_get_user_id, (username,))
-            user_id = cursor.fetchone()['user_id']
+            files = request.files.getlist(file_type)
 
-            sql_insert_image = "INSERT INTO images (filename, user_id, image, metadata) VALUES (%s, %s, %s, %s)"
-            cursor.execute(sql_insert_image, (filename, user_id, image, metadata))
-            connection.commit()
-        return jsonify(success=True, message="Image uploaded successfully")
-    except Exception as e:
-        print("Error:", e)
-        return jsonify(success=False, message="Failed to upload image")
+            username = session.get('username')
+            user_id = None
+            
+            with connection.cursor() as cursor:
+                sql_get_user_id = "SELECT user_id FROM users WHERE username = %s"
+                cursor.execute(sql_get_user_id, (username,))
+                user_id = cursor.fetchone()['user_id']
+
+            for file in files:
+                filename = secure_filename(file.filename)
+                file_data = file.read()
+                file_metadata = file.content_type
+
+                table_name = f"{file_type}s" 
+                
+                with connection.cursor() as cursor:
+                    sql_insert_file = f"INSERT INTO {table_name} (filename, user_id, {file_type}, metadata) VALUES (%s, %s, %s, %s)"
+                    cursor.execute(sql_insert_file, (filename, user_id, file_data, file_metadata))
+                    connection.commit()
+
+            return jsonify(success=True, message="Files uploaded successfully")
+        
+        except Exception as e:
+            print("Error:", e)
+            return jsonify(success=False, message="Failed to upload")
+
     
-@app.route('/upload_audio', methods=['POST'])
-@jwt_required()
-def upload_audio():
-    if session['authenticated'] == False:
-        return redirect('/login')
-    try:
-        data = request.form
-        username = data['username']
-        file = request.files['file']
-        filename = file.filename
-        audio = file.read()
-        metadata = data['metadata']
-        with connection.cursor() as cursor:
-            sql_get_user_id = "SELECT user_id FROM users WHERE username = %s"
-            cursor.execute(sql_get_user_id, (username,))
-            user_id = cursor.fetchone()['user_id']
-
-            sql_insert_audio = "INSERT INTO audios (filename, user_id, audio, metadata) VALUES (%s, %s, %s, %s)"
-            cursor.execute(sql_insert_audio, (filename, user_id, audio, metadata))
-            connection.commit()
-        return jsonify(success=True, message="Audio uploaded successfully")
-    except Exception as e:
-        print("Error:", e)
-        return jsonify(success=False, message="Failed to upload audio")
-
+        
 if __name__ == '__main__':
     app.run(port=5001, debug=True)

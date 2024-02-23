@@ -53,3 +53,4 @@ function checkSignup() {
         console.error('Error:', error);
     });
 }
+
