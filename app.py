@@ -1,9 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, make_response, abort, session, jsonify
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, decode_token
 from datetime import timedelta
-from flask_wtf import FlaskForm, CSRFProtect
-from wtforms import FileField, SubmitField
-import pymysql
+from flask_wtf.csrf import CSRFProtect
+import pymysql  
 import hashlib
 import base64
 
@@ -15,6 +14,8 @@ app.secret_key = 'ullabritasmitafrita'
 app.config['JWT_ACCESS_COOKIE_PATH'] = '/user'
 session={'authenticated': False,'username': ''}
 jwt = JWTManager(app)
+csrf = CSRFProtect(app)
+csrf.init_app(app)
 
 try: 
     connection = pymysql.connect(host='localhost',

@@ -115,6 +115,7 @@
         <span class="borderLine"></span>
         <form id="loginForm" method="post" action="/login">
             <h2>Login</h2>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="inputBox">
                 <input type="text" name="username" id="username" required="">
                 <span>Username</span>
