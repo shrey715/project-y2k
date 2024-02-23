@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Upload Images/Audio</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+        <link rel="icon" href="{{ url_for('static', filename='images/logo-no-text.png') }}" type="image/x-icon">
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles/uploadstyle.css') }}">
+    </head>
+    <body>
+        <nav class="sidebar">
+            <ul class="sidebar-nav">
+                <div class="sidebar-logo">
+                    <img src="{{ url_for('static', filename='images/logo-no-text.png') }}" alt="logo">
+                </div>
+                <button class="sidebar-close" onclick="toggleMenu()">
+                    <i  id="sidebar-btn" class='bx bxs-chevrons-right'></i>
+                </button>
+                <li class="sidebar-nav-item">
+                    <a href="{{ url_for('user_dashboard', username=username) }}">
+                        <i class='bx bx-home-alt-2' ></i>
+                        <span class="nav-text">Home</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="{{ url_for('video_editor') }}">
+                        <i class='bx bx-video-plus' ></i>
+                        <span class="nav-text">Video Editor</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="{{ url_for('upload') }}">
+                        <i class='bx bx-image' ></i>
+                        <span class="nav-text">Upload Images/Audio</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#">
+                        <i class='bx bxs-user-circle'></i>
+                        <span class="nav-text">{{ username }}</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <div class="main-content">
+            <h2>Upload Images</h2>
+            <div class="image-upload" id="image-upload">
+                <form action="{{ url_for('upload') }}" method="post" class="dropzone" id="image-dropzone">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="username" value="{{ username }}">
+                    <input type="hidden" name="file_type" value="image">
+                    <label for="image">Drag and drop or click to select image files</label>
+                    <input type="file" name="image" id="image" accept="image/*" multiple>
+                    <input type="submit" name="submit" value="Upload">
+                </form>
+            </div>
+            <h2>Upload Audio</h2>
+            <div class="audio-upload" id="audio-upload">
+                <form action="{{ url_for('upload') }}" method="post" class="dropzone" id="audio-dropzone">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="username" value="{{ username }}">
+                    <input type="hidden" name="file_type" value="audio">
+                    <label for="audio">Drag and drop or click to select audio files</label>
+                    <input type="file" name="audio" id="audio" accept="audio/*" multiple>
+                    <input type="submit" name="submit" value="Upload">
+                </form>
+            </div>
+        </div>
+        <script src="{{ url_for('static', filename='scripts/script.js') }}" async defer></script>
+    </body>
+</html>
