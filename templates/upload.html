@@ -47,23 +47,27 @@
         </nav>
         <div class="main-content">
             <h2>Upload Images</h2>
-        <div class="image-upload" id="image-upload">
-            <form action="{{ url_for('upload') }}" method="POST" enctype="multipart/form-data" class="dropzone" id="image-dropzone">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <label for="image">Drag and drop or click to select image files</label>
-                <input type="file" name="image" id="image" accept="image/*" multiple>
-                <input type="submit" name="submit" value="Upload">
-            </form>
-        </div>
-        <h2>Upload Audio</h2>
-        <div class="audio-upload" id="audio-upload">
-            <form action="{{ url_for('upload') }}" method="POST" enctype="multipart/form-data" class="dropzone" id="audio-dropzone">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <label for="audio">Drag and drop or click to select audio files</label>
-                <input type="file" name="audio" id="audio" accept="audio/*" multiple>
-                <input type="submit" name="submit" value="Upload">
-            </form>
-        </div>
+            <div class="image-upload" id="image-upload">
+                <form action="{{ url_for('upload') }}" method="post" class="dropzone" id="image-dropzone">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="username" value="{{ username }}">
+                    <input type="hidden" name="file_type" value="image">
+                    <label for="image">Drag and drop or click to select image files</label>
+                    <input type="file" name="image" id="image" accept="image/*" multiple>
+                    <input type="submit" name="submit" value="Upload">
+                </form>
+            </div>
+            <h2>Upload Audio</h2>
+            <div class="audio-upload" id="audio-upload">
+                <form action="{{ url_for('upload') }}" method="post" class="dropzone" id="audio-dropzone">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="username" value="{{ username }}">
+                    <input type="hidden" name="file_type" value="audio">
+                    <label for="audio">Drag and drop or click to select audio files</label>
+                    <input type="file" name="audio" id="audio" accept="audio/*" multiple>
+                    <input type="submit" name="submit" value="Upload">
+                </form>
+            </div>
         </div>
         <script src="{{ url_for('static', filename='scripts/script.js') }}" async defer></script>
     </body>
