@@ -1,158 +1,249 @@
-/*.center {
-    text-align: center;
+@import url('https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Rubik+Glitch&family=VT323&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bungee+Shade&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bungee&display=swap');
+
+:root{
+    --color-background: #191919;
+    --color-cyan: #45f3ff;
+    --color-pink: #ff2770;
+    --color-white: #fff;
+    --color-menu: #333;
 }
 
-#dropZone {
-    width: 300px;
-    height: 200px;
-    margin: 20px auto;
-    text-align: center;
-    line-height: 200px; 
+*{
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 400;
 }
 
-.regular {
-    border: 2px dashed #ccc;
-}
-
-.highlight {
-    border: 2px dashed #4a8;
-}
-
-#backButton {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    padding: 10px;
-    background-color: #ccc;
-    border: none;
-    cursor: pointer;
-}
-
-#imagePreview {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-}    
-
-#imagePreview img {
-    height: 200px;
-    margin: 10px;
-}*/
-/* Reset some default styles */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap');
-body, html {
+body{
+    background: var(--color-background);
     margin: 0;
-    padding: 0;
+    overflow-x: hidden;
 }
 
-body {
-    font-family: Arial, sans-serif;
-    font-family: 'Poppins', 'Helvetica';
-    background-color: #1c1c1c;
+.sidebar {
+    z-index: 1;
+    height: 100vh;
+    width: fit-content;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: var(--color-menu);
+    color: var(--color-white);
+    overflow-x: hidden;
+    transition: width 0.5s;
+    padding-top: 60px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0px;
+
+    transition: width 0.3s ease-in-out;
 }
 
-.center {
-    text-align: center;
-    color: whitesmoke;
-}
-
-#backButton {
-    background-color: whitesmoke;
-    color: #1c1c1c;
-    font-size: 1.2vw;
-    padding: 0.5vw 1.5vw;
+.sidebar-close{
+    width: 100%;
+    margin-top: 0px;
+    font-size: 2.5rem;
+    background-color: var(--color-menu);
     border: none;
     cursor: pointer;
-    border-radius: 2vw;
-    margin: 1vw;
-    transition: 0.75s ease;
+    color: var(--color-white);
+
+    transition: all 0.3s ease-in-out;
 }
 
-#backButton:hover {
-    background-color: #ff2770;
+.sidebar-close:hover{
+    background-color: var(--color-cyan);
+    color: var(--color-menu);
 }
 
-/* Drop zone styles */
-#dropZone {
-    border: 0.4vw solid rgb(51, 8, 0);
-    border-radius: 2vw;
-    padding: 4vw;
-    text-align: center;
-    margin: 2vw auto;
-    background-color:#fdc8e5;
-    width: 80vw;
-    max-width: 50vw;
+.sidebar-logo{
     cursor: pointer;
-    color: rgb(51, 8, 0);
-    font-size: 1.1vw;
+    width: 100%;
+    text-align: center;
+    transition: all 0.3s ease-in-out;
 }
 
-#dropZone:hover{
-    border: 0.4w solid #ff2770;
+.sidebar-logo:hover{
+    transform: scale(1.1);
 }
 
-#dropZone i:hover{
-    color:#ff2770;
-    border: 0.4w solid #ff2770;
+.sidebar-logo img{
+    width: 2.5rem;
+    padding: 1rem 0px;
 }
 
-#dropZone i {
-    position: absolute;
-    top: 28%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 2.7vw;
-    transition: 0.75s ease;
+.sidebar ul{
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
 }
 
-#dropZone span {
-    display: block; 
-    font-size: 1.5vw;
-    color: rgb(51, 8, 0);
+.sidebar ul li{
+    padding: 1rem 0px;
+    text-align: center;
+    transition: all 0.3s ease-in-out;
 }
 
-#dropZone.highlight {
-    border-color:  #ff2770;
+.sidebar ul li a{
+    text-decoration: none;
+    color: var(--color-white);
+    font-size: 1.5em;
+    padding: 0px 1rem;
+    transition: all 0.3s ease-in-out;
 }
 
-#imagePreview {
-    margin-top: 2vw;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-}
+.sidebar ul li:hover{
+    background-color: var(--color-cyan);
+    color: var(--color-menu);
 
-/* File input styles */
-#imageUpload {
-    display: none;
-}
-
-#dropZoneText {
-    font-size: 1.5vw;
-    color: #666;
-}
-
-/* Styling for the "Drop the image to upload" text */
-#dropZone.highlight #dropZoneText {
-    color: #4CAF50;
-}
-
-#imagePreview img {
-    margin: 2vw;
-    width: 15vw; /* Set a fixed width for uniformity */
-    height: 15vw; /* Set a fixed height for uniformity */
-    object-fit: cover; /* Crop the image to cover the specified dimensions */
-    border-radius: 2vw;
-    box-shadow: 0 0 1vw rgba(0, 0, 0, 0.2);
-}
-
-/* Ensure consistent aspect ratio */
-@media (max-width: 768px) {
-    #imagePreview img {
-        width: 90vw;
-        height: 90vw; /* Adjust height to maintain aspect ratio */
+    a{
+        color: var(--color-menu);
     }
 }
 
+.sidebar ul li:last-child{
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
 
+.sidebar-nav-item{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    transition: all 0.3s ease-in-out;
+
+    font-weight: 400;
+    span{   
+        flex-direction: row;
+        align-items: right;
+        justify-content: center;
+        text-align: center;
+        padding: 0px 1px;
+    }    
+}
+
+.nav-text {
+    display: none;
+    opacity: 0;
+    max-height: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease-in-out, max-height 0.5s ease-in-out, visibility 0.5s ease-in-out;
+}
+
+.nav-text.show-nav-text {
+    opacity: 1;
+    display: inline-flex;
+    visibility: visible;
+}
+
+.main-content{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    padding: 0px;
+    margin-left: 3.6rem;
+    color: var(--color-white);
+}
+
+.image-upload{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 70%;
+    padding: 2rem;
+    margin: 2rem;
+    border: 2px dashed var(--color-cyan);
+    border-radius: 10px;
+    background-color: var(--color-menu);
+    color: var(--color-white);
+    transition: all 0.3s ease-in-out;
+}
+
+.image-upload form{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    width: 100%;
+}
+
+.image-upload form label{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    width: 100%;
+    color: var(--color-white);
+    transition: all 0.3s ease-in-out;
+}
+
+.image-upload form label input{
+    padding: 0.5rem;
+    width: 20%;
+    border: none;
+    border-radius: 5px;
+    background-color: var(--color-menu);
+    color: var(--color-white);
+    font-size: 1rem;
+    transition: all 0.3s ease-in-out;
+}
+
+.audio-upload{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 70%;
+    padding: 2rem;
+    margin: 2rem;
+    border: 2px dashed var(--color-pink);
+    border-radius: 10px;
+    background-color: var(--color-menu);
+    color: var(--color-white);
+    transition: all 0.3s ease-in-out;
+}
+
+.audio-upload form{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    width: 100%;
+}
+
+.audio-upload form label{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    width: 100%;
+    color: var(--color-white);
+    transition: all 0.3s ease-in-out;
+}
+
+.audio-upload form label input{
+    padding: 0.5rem;
+    width: 20%;
+    border: none;
+    border-radius: 5px;
+    background-color: var(--color-menu);
+    color: var(--color-white);
+    font-size: 1rem;
+    transition: all 0.3s ease-in-out;
+}
 

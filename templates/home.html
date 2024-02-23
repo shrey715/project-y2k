@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title></title>
+        <title>User Dashboard</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -12,10 +12,13 @@
     </head>
     <body>
         <nav class="sidebar">
-            <button class="sidebar-close" onclick="toggleMenu()">
-                <i  id="sidebar-btn" class='bx bxs-chevrons-right'></i>
-            </button>
             <ul class="sidebar-nav">
+                <div class="sidebar-logo">
+                    <img src={{url_for('static',filename='images/logo-no-text.png')}} alt="logo">
+                </div>
+                <button class="sidebar-close" onclick="toggleMenu()">
+                    <i  id="sidebar-btn" class='bx bxs-chevrons-right'></i>
+                </button>
                 <li class="sidebar-nav-item">
                     <a href={{ url_for('user_dashboard', username=username) }}>
                         <i class='bx bx-home-alt-2' ></i>
@@ -29,15 +32,34 @@
                     </a>
                 </li>
                 <li class="sidebar-nav-item">
-                    <a href={{ url_for('upload_images') }}>
+                    <a href={{ url_for('upload') }}>
                         <i class='bx bx-image' ></i>
-                        <span class="nav-text">Upload Images</span>
+                        <span class="nav-text">Upload Images/Audio</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#">
+                        <i class='bx bxs-user-circle'></i>
+                        <span class="nav-text">Profile</span>
                     </a>
                 </li>
             </ul>
         </nav>
         <div class="main-content">
-            
+            <header>
+                <div class="search-wrapper">
+                    <i class='bx bx-search' onclick="searchImage()"></i>
+                    <input id="searchbar" type="search" placeholder="Search">
+                </div>
+                <div class="image_gallery">
+                    {% for image in images %}
+                        <div class="image-container">
+                            <img src="{{ url_for('get_image',image_id=image['image_id']) }}" alt="image">
+                            <p>{{ image['filename'] }}</p>
+                        </div>
+                    {% endfor %} 
+                </div>
+            </header>
         </div>
         <script src="{{ url_for('static', filename='scripts/script.js') }}" async defer></script>
     </body>
