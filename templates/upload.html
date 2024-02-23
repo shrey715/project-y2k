@@ -49,6 +49,7 @@
             <h2>Upload Images</h2>
             <div class="image-upload">
                 <form action="{{ url_for('upload_image') }}" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                     <input type="file" name="file" id="file" class="inputfile" accept="image/*" multiple>
                     <label for="file" class="upload-btn">
                         <i class='bx bx-cloud-upload' ></i>
@@ -63,6 +64,7 @@
             <h2>Upload Audio</h2>
             <div class="audio-upload">
                 <form action="{{ url_for('upload_audio') }}" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                     <input type="file" name="file" id="file" class="inputfile" accept="audio/*">
                     <label for="file" class="upload-btn">
                         <i class='bx bx-cloud-upload' ></i>
