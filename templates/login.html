@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{csrf_token()}}">
     <title>Login | Y2K Video Editor</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="icon" href={{url_for('static',filename='images/logo-no-text.png')}} type="image/x-icon">
     <link rel="stylesheet" href={{url_for('static',filename='styles/loginstyle.css')}}>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -115,7 +117,6 @@
         <span class="borderLine"></span>
         <form id="loginForm" method="post" action="/login">
             <h2>Login</h2>
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="inputBox">
                 <input type="text" name="username" id="username" required="">
                 <span>Username</span>
@@ -129,11 +130,41 @@
             <div class="links">
                 <a href={{ url_for('signup') }}>Don't have an account? Sign Up</a>
             </div>
-            <div id="attempt-msg"></div>
             <input type="submit" value="Login" class="login-button">
         </form>
     </div>
 
-    <script src="{{ url_for('static', filename='scripts/script.js') }}"></script>
+    <script>
+        $('#loginForm').on('submit', function(event) {
+            event.preventDefault();
+            doLogin();
+        });
+        function doLogin(){
+            var username = $('#username').val();
+            var password = $('#password').val();
+            var csrf_token = $('input[name="csrf_token"]').val();
+            $.ajax({
+                url: '/login',
+                type: 'POST',
+                data: {
+                    username: username,
+                    password: password,
+                    csrf_token: csrf_token
+                },
+                success: function(response){
+                    if(response.status == 'success'){
+                        alert(response.message);
+                        window.location.href = '/user_dashboard/'+$('#username').val();
+                    } else if(response.status == 'error'){
+                        alert(response.message);
+                        window.location.href = '/login';
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown){
+                    alert('An error occurred during the request: ' + textStatus);
+                }
+            });
+        }
+    </script>
 </body>
 </html>
