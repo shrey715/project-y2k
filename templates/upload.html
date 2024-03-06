@@ -40,6 +40,14 @@
                 </li>
             </ul>
             <ul>
+                {% if username == 'admin' %}
+                <li class="sidebar-nav-item">
+                    <a href={{ url_for('admin_dashboard') }}>
+                        <i class='bx bxs-report'></i>
+                        <span class="nav-text">Admin Dashboard</span>
+                    </a>
+                </li>
+                {% endif %}
                 <li class="sidebar-nav-item">
                     <a href="#">
                         <i class='bx bxs-user-circle'></i>

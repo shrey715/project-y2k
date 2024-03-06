@@ -183,6 +183,17 @@ def signup():
             return jsonify({'status': 'error', 'message': 'Failed to signup'})
     return render_template('signup.html')
 
+@app.route('/admin_dashboard/admin', methods=['GET'])
+@jwt_required()
+def admin_dashboard():
+    if session['authenticated'] == False:
+        return redirect('/login')
+    current_user = get_jwt_identity()
+    if current_user != 'admin':
+        print("Error: Current user does not match requested user.")
+        abort(403)
+    return render_template('adminportal.html', username='admin')
+
 @app.route('/user_dashboard/<username>', methods=['GET'])
 @jwt_required()
 def user_dashboard(username):
@@ -198,10 +209,13 @@ def user_dashboard(username):
         cursor.execute(sql_get_user_id, (username,))
         user_id = cursor.fetchone()['user_id']
 
+        sql_default_images = "SELECT * FROM images WHERE user_id = 1"
         sql_get_images = "SELECT * FROM images WHERE user_id = %s"
         cursor.execute(sql_get_images, (user_id,))
         images = cursor.fetchall()
-    return render_template('home.html', username=username, images=images)
+        cursor.execute(sql_default_images)
+        default_images = cursor.fetchall()
+    return render_template('home.html', username=username, images=images, default_images=default_images)
 
 @app.route('/get_image/<image_id>', methods=['GET'])
 @jwt_required()

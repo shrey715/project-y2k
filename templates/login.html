@@ -152,12 +152,22 @@
                     csrf_token: csrf_token
                 },
                 success: function(response){
-                    if(response.status == 'success'){
-                        alert(response.message);
-                        window.location.href = '/user_dashboard/'+$('#username').val();
-                    } else if(response.status == 'error'){
-                        alert(response.message);
-                        window.location.href = '/login';
+                    if(username == 'admin'){
+                        if(response.status == 'success'){
+                            alert(response.message);
+                            window.location.href = '/admin_dashboard/admin';
+                        } else if(response.status == 'error'){
+                            alert(response.message);
+                            window.location.href = '/login';
+                        }   
+                    }else{
+                        if(response.status == 'success'){
+                            alert(response.message);
+                            window.location.href = '/user_dashboard/'+$('#username').val();
+                        } else if(response.status == 'error'){
+                            alert(response.message);
+                            window.location.href = '/login';
+                        }
                     }
                 },
                 error: function(jqXHR, textStatus, errorThrown){

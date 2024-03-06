@@ -39,6 +39,14 @@
                 </li>
             </ul>
             <ul>
+                {% if username == 'admin' %}
+                <li class="sidebar-nav-item">
+                    <a href={{ url_for('admin_dashboard') }}>
+                        <i class='bx bxs-report'></i>
+                        <span class="nav-text">Admin Dashboard</span>
+                    </a>
+                </li>
+                {% endif %}
                 <li class="sidebar-nav-item">
                     <a href="#">
                         <i class='bx bxs-user-circle'></i>
@@ -60,6 +68,20 @@
                     <input id="searchbar" type="search" placeholder="Search">
                 </div>
             </header>
+            <div class="image-gallery-header">
+                <p>Default Images</p>
+            </div>
+            <div class="image_gallery">
+                {% for image in default_images %}
+                    <div class="image-container">
+                        <img src="{{ url_for('get_image',image_id=image['image_id']) }}" alt="image">
+                    </div>
+                {% endfor %}
+            </div>
+            <hr>
+            <div class="image-gallery-header">
+                <p>Your Images</p>
+            </div>
             <div class="image_gallery">
                 {% for image in images %}
                     <div class="image-container">
