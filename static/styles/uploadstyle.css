@@ -110,10 +110,9 @@ body{
     }
 }
 
-.sidebar ul li:last-child{
+.sidebar ul:last-child{
     position: absolute;
     bottom: 0;
-    width: 100%;
 }
 
 .sidebar-nav-item{
