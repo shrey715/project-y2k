@@ -1,73 +1,103 @@
-from pathlib import Path
-from flask import Flask, render_template, request, redirect, url_for, make_response, abort, session, jsonify
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, decode_token
+from flask import g, Flask, render_template, request, redirect, url_for, make_response, abort, session, jsonify
+from flask_jwt_extended import JWTManager, unset_jwt_cookies, create_access_token, jwt_required, get_jwt_identity, decode_token
 from datetime import timedelta
-from flask_wtf.csrf import CSRFProtect, generate_csrf
+from flask_cors import CORS
+from flask_wtf.csrf import CSRFProtect
 from werkzeug.utils import secure_filename
 import pymysql  
 import hashlib
-import base64
+import os
+import glob
+import json
+import video_creator as vc
 
-app = Flask(__name__)
+app=Flask(__name__)
 app.config["JWT_TOKEN_LOCATION"] = ["headers", "cookies", "json", "query_string"]
 app.config['JWT_SECRET_KEY'] = 'super-secret'
 app.config['JWT_COOKIE_SECURE'] = False
 app.secret_key = 'ullabritasmitafrita'
 app.config['JWT_ACCESS_COOKIE_PATH'] = '/user'
 app.config['JWT_COOKIE_CSRF_PROTECT'] = False
-app.config['SESSION_COOKIE_DOMAIN'] = 'localhost' 
+app.config['SESSION_COOKIE_DOMAIN'] = None
+app.config['SESSION_COOKIE_SAMESITE'] = 'None'
+app.config['SESSION_COOKIE_SECURE'] = True
 session={'authenticated': False,'username': ''}
 jwt = JWTManager(app)
 csrf = CSRFProtect(app)
+CORS(app)
 
-def insert_file_to_db(table_name, data_field, filename, user_id, file_data, file_metadata):
-    with connection.cursor() as cursor:
-        sql_insert_file = f"INSERT INTO {table_name} (filename, user_id, {data_field}, metadata) VALUES (%s, %s, %s, %s)"
-        cursor.execute(sql_insert_file, (filename, user_id, file_data, file_metadata))
-        print("File uploaded")
-        print(sql_insert_file, (filename, user_id, file_data, file_metadata))
+def extractAudioFiles(connection):
+    directory = 'static/audio/preloaded'
+    audio_files = glob.glob(os.path.join(directory, '*.mp3'))
+
+    try:
+        with connection.cursor() as cursor:
+            for audio_file in audio_files:
+                filename = os.path.basename(audio_file)
+
+                with open(audio_file, 'rb') as f:
+                    audio_data = f.read()
+
+                metadata = {}
+                metadata_json = json.dumps(metadata)
+
+                sql = "INSERT INTO `audios` (`filename`, `user_id`, `audio`, `metadata`) VALUES (%s, 1, %s, %s)"
+                cursor.execute(sql, (filename, audio_data, metadata_json))
         connection.commit()
+    except pymysql.MySQLError as e:
+        print(f"Error: {e}")    
 
-def insert_preloaded_audios():
-    # Preloaded audio library
-    folder_path = Path("static/audio/preloaded")
-    audio_files = [*folder_path.glob("*.wav"), *folder_path.glob("*.mp3"), *folder_path.glob("*.aac")]
+def db_init():
+    try: 
+        connection = pymysql.connect(host='localhost',
+                                            user='root',
+                                            password='Noshu@1211',
+                                            db='y2k_database',
+                                            charset='utf8mb4',
+                                            cursorclass=pymysql.cursors.DictCursor)
+    except Exception as e:
+        connection = pymysql.connect(host='localhost',
+                                            user='root',
+                                            password='Noshu@1211',
+                                            charset='utf8mb4',
+                                            cursorclass=pymysql.cursors.DictCursor)
+        with connection.cursor() as cursor:
+            cursor.execute('CREATE DATABASE y2k_database')
+            cursor.execute('USE y2k_database')
+            cursor.execute('CREATE TABLE users (user_id INT PRIMARY KEY AUTO_INCREMENT, username VARCHAR(100) UNIQUE, email VARCHAR(100) UNIQUE, password VARCHAR(64));')
+            cursor.execute('CREATE TABLE images (image_id INT PRIMARY KEY AUTO_INCREMENT, filename VARCHAR(255), user_id INT, image LONGBLOB, metadata JSON, FOREIGN KEY (user_id) REFERENCES users(user_id));')
+            cursor.execute('CREATE TABLE audios (audio_id INT PRIMARY KEY AUTO_INCREMENT, filename VARCHAR(255), user_id INT, audio LONGBLOB, metadata JSON, FOREIGN KEY (user_id) REFERENCES users(user_id));')
+            
+            username = 'admin'
+            email = 'admin@y2k.com'
+            hashed_password = hashlib.sha256('admin'.encode()).hexdigest()
+            cursor.execute('INSERT INTO users (username, email, password) VALUES (%s, %s, %s)', (username, email, hashed_password))
+            
+            audio_files = extractAudioFiles(connection)
+            connection.commit()
+    connection.close()
+    
+@app.before_request
+def before_request():
+    g.db = pymysql.connect(host='localhost',
+                           user='root',
+                           password='Noshu@1211',
+                           db='y2k_database',
+                           charset='utf8mb4',
+                           cursorclass=pymysql.cursors.DictCursor)
 
-    for audio_file in audio_files:
-        print(audio_file.name)
-        metadata = dict()
-        with audio_file.open() as file:
-            insert_file_to_db('audios', 'audio', audio_file.name, 'admin', file.read(), metadata)
-
-try: 
-    connection = pymysql.connect(host='localhost',
-                                        user='root',
-                                        password='vishak30',
-                                        db='y2k_database',
-                                        charset='utf8mb4',
-                                        cursorclass=pymysql.cursors.DictCursor)
-except Exception as e:
-    connection = pymysql.connect(host='localhost',
-                                        user='root',
-                                        password='vishak30',
-                                        charset='utf8mb4',
-                                        cursorclass=pymysql.cursors.DictCursor)
-    with connection.cursor() as cursor:
-        cursor.execute("CREATE DATABASE y2k_database")
-        cursor.execute("USE y2k_database")
-        cursor.execute("CREATE TABLE users (user_id INT PRIMARY KEY AUTO_INCREMENT, username VARCHAR(100) UNIQUE, email VARCHAR(100) UNIQUE, password VARCHAR(64));")
-        cursor.execute("CREATE TABLE images (image_id INT PRIMARY KEY AUTO_INCREMENT, filename VARCHAR(255), user_id INT, image LONGBLOB, metadata TEXT, FOREIGN KEY (user_id) REFERENCES users(user_id));")
-        cursor.execute("CREATE TABLE audios (audio_id INT PRIMARY KEY AUTO_INCREMENT, filename VARCHAR(255), user_id INT, audio LONGBLOB, metadata TEXT, FOREIGN KEY (user_id) REFERENCES users(user_id));")
-        cursor.execute("INSERT INTO users (username, email, password) values (admin, admin@y2k.io, admin@y2k@123);")
-        insert_preloaded_audios()
-        connection.commit()
-
+@app.teardown_request
+def teardown_request(exception):
+    db = getattr(g, 'db', None)
+    if db is not None:
+        db.close()
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
 @app.route('/login', methods=['GET', 'POST'])
+@csrf.exempt
 def login():
     if session['authenticated']:
         return redirect(f'/user_dashboard/{session["username"]}')
@@ -78,71 +108,91 @@ def login():
             password = data['password']
 
             if not username or not password:
-                return jsonify(authenticated=False, message="Please fill in all fields")
+                return jsonify({'status': 'error', 'message': 'Please fill in all fields'})
 
-            with connection.cursor() as cursor:
+            with g.db.cursor() as cursor:
                 sql_check_user = "SELECT * FROM users WHERE username = %s"
                 cursor.execute(sql_check_user, (username,))
                 result = cursor.fetchone()
 
                 if not result:
-                    return jsonify(authenticated=False, message="Username does not exist")
+                    return jsonify({'status': 'error', 'message': 'User does not exist'})
 
                 hashed_password = hashlib.sha256(password.encode()).hexdigest()                
                 if result['password'] == hashed_password:
                     access_token = create_access_token(identity=username, expires_delta=timedelta(days=7))
-                    decoded = decode_token(access_token)
-                    response = make_response(redirect(url_for('user_dashboard', username=username)))
+                    response = make_response(jsonify({'status': 'success', 'message': 'Login successful'}))
                     response.set_cookie('access_token_cookie', value=access_token, max_age=3600, httponly=True, path='/')
                     session['authenticated'] = True
                     session['username'] = username
                     
                     return response
                 else:
-                    return jsonify(authenticated=False, message="Incorrect password")
+                    return jsonify({'status': 'error', 'message': 'Invalid password'})
         except Exception as e:
             print("Error:", e)
-            return jsonify(authenticated=False, message="Failed to login")                    
+            return jsonify({'status': 'error', 'message': 'Failed to login'})
     return render_template('login.html')
 
-@app.route('/signup', methods=['POST','GET'])
+@app.route('/logout', methods=['GET'])
+@csrf.exempt
+def logout():
+    resp = make_response(redirect('/login'))
+    resp.delete_cookie('access_token_cookie', path='/')
+    session['authenticated'] = False
+    session.pop('username', None)
+    return resp
+
+@app.route('/signup', methods=['GET', 'POST'])
+@csrf.exempt
 def signup():
+    if session.get('authenticated', False):
+        return redirect(f'/user_dashboard/{session["username"]}')
     if request.method == 'POST':
         try:
             data = request.form
-            username = data['username']
+            username = data['username'] 
             password = data['password']
             email = data['email']
 
             if not username or not password or not email:
-                return jsonify(authenticated=False, message="Please fill in all fields")
+                return jsonify({'status': 'error', 'message': 'Please fill in all fields'})
 
-            with connection.cursor() as cursor:
-                sql_check_username = "SELECT * FROM users WHERE username = %s"
-                cursor.execute(sql_check_username, (username,))
-                result_username = cursor.fetchone()
+            with g.db.cursor() as cursor:
+                sql_check_user = "SELECT * FROM users WHERE username = %s"
+                cursor.execute(sql_check_user, (username,))
+                result = cursor.fetchone()
 
-                if result_username:
-                    return jsonify(authenticated=False, message="Username is already taken")
-
-                sql_check_email = "SELECT * FROM users WHERE email = %s"
-                cursor.execute(sql_check_email, (email,))
-                result_email = cursor.fetchone()
-
-                if result_email:
-                    return jsonify(authenticated=False, message="Email is already taken")
+                if result:
+                    return jsonify({'status': 'error', 'message': 'User already exists'})
 
                 hashed_password = hashlib.sha256(password.encode()).hexdigest()
-                sql_insert_user = "INSERT INTO users (username, password, email) VALUES (%s, %s, %s)"
-                cursor.execute(sql_insert_user, (username, hashed_password, email))
-                connection.commit()
+                sql_insert_user = "INSERT INTO users (username, email, password) VALUES (%s, %s, %s)"
+                cursor.execute(sql_insert_user, (username, email, hashed_password))
+                g.db.commit()
 
-            return jsonify(authenticated=True, message="Signup successful")
+                access_token = create_access_token(identity=username, expires_delta=timedelta(days=7))
+                response = make_response(jsonify({'status': 'success', 'message': 'Signup successful'}))
+                response.set_cookie('access_token_cookie', value=access_token, max_age=3600, httponly=True, path='/')
+                session['authenticated'] = True
+                session['username'] = username
+                
+                return response
         except Exception as e:
             print("Error:", e)
-            return jsonify(authenticated=False, message="Failed to signup")
-
+            return jsonify({'status': 'error', 'message': 'Failed to signup'})
     return render_template('signup.html')
+
+@app.route('/admin_dashboard/admin', methods=['GET'])
+@jwt_required()
+def admin_dashboard():
+    if session['authenticated'] == False:
+        return redirect('/login')
+    current_user = get_jwt_identity()
+    if current_user != 'admin':
+        print("Error: Current user does not match requested user.")
+        abort(403)
+    return render_template('adminportal.html', username='admin')
 
 @app.route('/user_dashboard/<username>', methods=['GET'])
 @jwt_required()
@@ -154,15 +204,18 @@ def user_dashboard(username):
         print("Error: Current user does not match requested user.")
         abort(403)
     images = []
-    with connection.cursor() as cursor:
+    with g.db.cursor() as cursor:
         sql_get_user_id = "SELECT user_id FROM users WHERE username = %s"
         cursor.execute(sql_get_user_id, (username,))
         user_id = cursor.fetchone()['user_id']
 
+        sql_default_images = "SELECT * FROM images WHERE user_id = 1"
         sql_get_images = "SELECT * FROM images WHERE user_id = %s"
         cursor.execute(sql_get_images, (user_id,))
         images = cursor.fetchall()
-    return render_template('home.html', username=username, images=images)
+        cursor.execute(sql_default_images)
+        default_images = cursor.fetchall()
+    return render_template('home.html', username=username, images=images, default_images=default_images)
 
 @app.route('/get_image/<image_id>', methods=['GET'])
 @jwt_required()
@@ -171,14 +224,15 @@ def get_image(image_id):
     if session['authenticated'] == False:
         return redirect('/login')
     try:
-        with connection.cursor() as cursor:
+        with g.db.cursor() as cursor:
             sql_get_image = "SELECT * FROM images WHERE image_id = %s"
             cursor.execute(sql_get_image, (image_id,))
             image = cursor.fetchone()
             
             if image:
                 image_data = image['image']
-                headers = {'Content-Type': 'image/' + image['filename'].split('.')[-1]} 
+                metadata = json.loads(image['metadata'])
+                headers = {'Content-Type': metadata['content-type']}
                 return make_response(image_data, 200, headers)
             else:
                 return jsonify(success=False, message="Image not found")
@@ -217,32 +271,28 @@ def upload():
             username = session.get('username')
             user_id = None
             
-            with connection.cursor() as cursor:
+            with g.db.cursor() as cursor:
                 sql_get_user_id = "SELECT user_id FROM users WHERE username = %s"
                 cursor.execute(sql_get_user_id, (username,))
                 user_id = cursor.fetchone()['user_id']
 
             for file in files:
-                print(1)
-                table_name = f"{file_type}s"
                 filename = secure_filename(file.filename)
                 file_data = file.read()
-                file_metadata = file.content_type
+                file_metadata = json.dumps({"filename": filename, "user_id": user_id, "file_type": file_type, "content-type": file.content_type})
+                table_name = f"{file_type}s" 
                 
-                insert_file_to_db(table_name, file_type, filename, user_id, file_data, file_metadata)
-                
-                # with connection.cursor() as cursor:
-                #     sql_insert_file = f"INSERT INTO {table_name} (filename, user_id, {file_type}, metadata) VALUES (%s, %s, %s, %s)"
-                #     cursor.execute(sql_insert_file, (filename, user_id, file_data, file_metadata))
-                #     print("File uploaded")
-                #     print(sql_insert_file, (filename, user_id, file_data, file_metadata))
-                #     connection.commit()
+                with g.db.cursor() as cursor:
+                    sql_insert_file = f"INSERT INTO {table_name} (filename, user_id, {file_type}, metadata) VALUES (%s, %s, %s, %s)"
+                    cursor.execute(sql_insert_file, (filename, user_id, file_data, file_metadata))
+                    print("File uploaded")
+                    g.db.commit()
 
             return jsonify(success=True, message="Files uploaded successfully")
-        
         except Exception as e:
             print("Error:", e)
-            return jsonify(success=False, message="Failed to upload")
-        
+            return jsonify(success=False, message="Failed to upload") 
+
 if __name__ == '__main__':
-    app.run(port=5001, debug=True)
+    db_init()
+    app.run(debug=True)

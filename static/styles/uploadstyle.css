@@ -9,8 +9,12 @@
     --color-pink: #ff2770;
     --color-white: #fff;
     --color-menu: #333;
-}
 
+    --color-cyan2: #23d5ab;
+    --color-pink2: #e73c7e;
+    --color-orange: #e74210;
+    --color-blue: #23a6d5;
+}
 *{
     font-family: 'JetBrains Mono', monospace;
     font-weight: 400;
@@ -106,10 +110,9 @@ body{
     }
 }
 
-.sidebar ul li:last-child{
+.sidebar ul:last-child{
     position: absolute;
     bottom: 0;
-    width: 100%;
 }
 
 .sidebar-nav-item{
@@ -245,4 +248,51 @@ body{
     color: var(--color-white);
     font-size: 1rem;
     transition: all 0.3s ease-in-out;
+}
+
+.fallback{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 70%;
+    padding: 2rem;
+    margin: 2rem;
+    border: 2px dashed var(--color-white);
+    border-radius: 10px;
+    background-color: var(--color-menu);
+    color: var(--color-white);
+    transition: all 0.3s ease-in-out;
+}
+
+.dropzone{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 2rem;
+    margin: 2rem;
+    border: 2px dashed var(--color-white);
+    border-radius: 10px;
+    background-color: var(--color-menu);
+    color: var(--color-white);
+    transition: all 0.3s ease-in-out;
+}
+
+.submit-btn{
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 5px;
+    background-color: var(--color-white);
+    color: var(--color-menu);
+    font-size: 1rem;
+    transition: all 0.3s ease-in-out;
+}
+
+.submit-btn:hover{
+    background-color: var(--color-orange);
+    color: var(--color-white);
+    cursor: pointer;
+    transform: scale(1.1);
 }

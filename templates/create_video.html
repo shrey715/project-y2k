@@ -8,7 +8,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
         <link rel="icon" href={{url_for('static',filename='images/logo-no-text.png')}} type="image/x-icon">
-        <link rel="stylesheet" href={{url_for('static',filename='styles/homestyle.css')}}>
+        <link rel="stylesheet" href={{url_for('static',filename='styles/videostyle.css')}}>
     </head>
     <body>
         <nav class="sidebar">
@@ -37,16 +37,45 @@
                         <span class="nav-text">Upload Images/Audio</span>
                     </a>
                 </li>
+            </ul>
+            <ul>
+                {% if username == 'admin' %}
+                <li class="sidebar-nav-item">
+                    <a href={{ url_for('admin_dashboard') }}>
+                        <i class='bx bxs-report'></i>
+                        <span class="nav-text">Admin Dashboard</span>
+                    </a>
+                </li>
+                {% endif %}
                 <li class="sidebar-nav-item">
                     <a href="#">
                         <i class='bx bxs-user-circle'></i>
-                        <span class="nav-text">Profile</span>
+                        <span class="nav-text">{{username}}</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href={{ url_for('logout') }}>
+                        <i class='bx bx-log-out' ></i>
+                        <span class="nav-text">Logout</span>
                     </a>
                 </li>
             </ul>
         </nav>
         <div class="main-content">
+            <div id="video-preview">
+                <video id="video" controls>
             
+                </video>
+            </div>
+            <div id="image-container">
+
+            </div>
+            <div id="audio-container">
+
+            </div>
+            <div id="video-overview">
+
+            </div>
         </div>
         <script src="{{ url_for('static', filename='scripts/script.js') }}" async defer></script>
     </body>
