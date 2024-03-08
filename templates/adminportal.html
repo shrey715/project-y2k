@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>Upload Images/Audio</title>
+        <title>Admin Dashboard</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -62,7 +62,35 @@
                 </li>
             </ul>
         </nav>
-
+        <div class="main-content">
+            <header>
+                <h1>ADMIN DASHBOARD</h1>
+            </header>
+            <div class="table-container">
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Number of Images</th>
+                            <th>Number of Audio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>{{user.user_id}}</td>
+                            <td>{{user.username}}</td>
+                            <td>{{user.email}}</td>
+                            <td>{{user.image_count}}</td>
+                            <td>{{user.audio_count}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
         <script src="{{ url_for('static', filename='scripts/script.js') }}" async defer></script>
     </body>
 </html>
