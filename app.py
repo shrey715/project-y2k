@@ -299,7 +299,7 @@ def upload():
             print("Error:", e)
             return jsonify(success=False, message="Failed to upload") 
 
-@app.route('user_details/<username>', methods=['GET'])
+@app.route('/user_details/<username>', methods=['GET'])
 @jwt_required()
 def user_details(username):
     if session['authenticated'] == False:
@@ -310,18 +310,19 @@ def user_details(username):
         abort(403)
     user_details = {}
     with g.db.cursor() as cursor:
-        sql_get_user_id = "SELECT user_id FROM users WHERE username = %s"
+        sql_get_user_id = "SELECT user_id, username, email FROM users WHERE username = %s"
         cursor.execute(sql_get_user_id, (username,))
-        user_id = cursor.fetchone()['user_id']
-
-        sql_get_images = "SELECT * FROM images WHERE user_id = %s"
-        sql_get_audios = "SELECT * FROM audios WHERE user_id = %s"
-        cursor.execute(sql_get_images, (user_id,))
+        user_details = cursor.fetchone()
+        
+        sql_get_images = "SELECT count(*) FROM images WHERE user_id = %s"
+        cursor.execute(sql_get_images, (user_details['user_id'],))
         images = cursor.fetchall()
-        cursor.execute(sql_get_audios, (user_id,))
+        sql_get_audios = "SELECT count(*) FROM audios WHERE user_id = %s"
+        cursor.execute(sql_get_audios, (user_details['user_id'],))
         audios = cursor.fetchall()
-        user_details = {'images': images, 'audios': audios}
-    return jsonify(user_details)
+        user_details['images_cnt'] = images[0]['count(*)']
+        user_details['audios_cnt'] = audios[0]['count(*)']
+    return render_template('user_details.html', username=current_user, user_details=user_details)
 
 if __name__ == '__main__':
     db_init()

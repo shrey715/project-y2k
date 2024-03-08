@@ -3,12 +3,12 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>User Dashboard</title>
+        <title>User Profile</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-        <link rel="icon" href={{url_for('static',filename='images/logo.ico')}} type="image/x-icon">
-        <link rel="stylesheet" href={{url_for('static',filename='styles/homestyle.css')}}>
+        <link rel="icon" href={{url_for('static',filename='images/logo-no-text.png')}} type="image/x-icon">
+        <link rel="stylesheet" href={{url_for('static',filename='styles/userdets.css')}}>
     </head>
     <body>
         <nav class="sidebar">
@@ -63,33 +63,59 @@
         </nav>
         <div class="main-content">
             <header>
-                <div class="search-wrapper">
-                    <i class='bx bx-search' onclick="searchImage()"></i>
-                    <input id="searchbar" type="search" placeholder="Search">
-                </div>
+                <h2>Welcome {{username}}!</h2>
             </header>
-            <div class="image-gallery-header">
-                <p>Default Images</p>
-            </div>
-            <div class="image_gallery">
-                {% for image in default_images %}
-                    <div class="image-container">
-                        <img src="{{ url_for('get_image',image_id=image['image_id']) }}" alt="image">
+            <main class="user-profile">
+                <div class="user-profile-details">
+                    <h2>User Details</h2>
+                    <table>
+                        <tr>
+                            <th>Username</th>
+                            <th>Email</th>
+                        </tr>
+                        <tr>
+                            <td>{{user_details.username}}</td>
+                            <td>{{user_details.email}}</td>
+                        </tr>
+                    </table>
+                </div>
+                <hr>
+                <div class="user-uploaded-content">
+                    <h2>Uploaded Content</h2>
+                    <div class="user-uploaded-content-details">
+                        <table>
+                            <tr>
+                                <th>Images</th>
+                                <th>Audios</th>
+                            </tr>
+                            <tr>
+                                <td>{{user_details.images_cnt}}</td>
+                                <td>{{user_details.audios_cnt}}</td>
+                            </tr>
+                        </table>
+                        <a href={{ url_for('upload') }} class="user-profile-action">
+                            <i class='bx bx-image' ></i>
+                            <span class="action-text">Upload Images/Audio</span>
+                        </a>
+                        <a href={{ url_for('user_dashboard', username=user_details.username) }} class="user-profile-action">
+                            <i class='bx bx-home-alt-2' ></i>
+                            <span class="action-text">View Images and Audio</span>
+                        </a>
                     </div>
-                {% endfor %}
-            </div>
-            <hr>
-            <div class="image-gallery-header">
-                <p>Your Images</p>
-            </div>
-            <div class="image_gallery">
-                {% for image in images %}
-                    <div class="image-container">
-                        <img src="{{ url_for('get_image',image_id=image['image_id']) }}" alt="image">
-                    </div>
-                {% endfor %} 
-            </div>
-        </div>
+                </div>
+                <hr>
+                <div class="user-profile-actions">
+                    <a href={{ url_for('video_editor') }} class="user-profile-action">
+                        <i class='bx bx-video-plus' ></i>
+                        <span class="action-text">Create Video</span>
+                    </a>
+                    <a href={{ url_for('logout') }} class="user-profile-action">
+                        <i class='bx bx-log-out' ></i>
+                        <span class="action-text">Logout</span>
+                    </a>
+                </div>
+            </main>
+        </div>  
         <script src="{{ url_for('static', filename='scripts/script.js') }}" async defer></script>
     </body>
 </html>
