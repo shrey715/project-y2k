@@ -123,6 +123,7 @@ def login():
                     access_token = create_access_token(identity=username, expires_delta=timedelta(days=7))
                     response = make_response(jsonify({'status': 'success', 'message': 'Login successful'}))
                     response.set_cookie('access_token_cookie', value=access_token, max_age=86400, httponly=True, path='/')
+
                     session['authenticated'] = True
                     session['username'] = username
                     
@@ -199,6 +200,7 @@ def admin_dashboard():
         cursor.execute(sql_get_users)
         users_list = cursor.fetchall()
     return render_template('adminportal.html', username='admin', users=users_list)
+
 
 @app.route('/user_dashboard/<username>', methods=['GET'])
 @jwt_required()
@@ -298,6 +300,7 @@ def upload():
         except Exception as e:
             print("Error:", e)
             return jsonify(success=False, message="Failed to upload") 
+
 
 @app.route('/user_details/<username>', methods=['GET'])
 @jwt_required()
