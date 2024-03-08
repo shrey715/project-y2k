@@ -49,7 +49,7 @@
                 </li>
                 {% endif %}
                 <li class="sidebar-nav-item">
-                    <a href="#">
+                    <a href="{{ url_for('user_details', username=username) }}">
                         <i class='bx bxs-user-circle'></i>
                         <span class="nav-text">{{username}}</span>
                     </a>
@@ -79,7 +79,7 @@
                     </thead>
                     <tbody>
                         {% for user in users %}
-                        <tr>
+                        <tr onclick="window.location='{{ url_for('user_details', username=user.username) }}';">
                             <td>{{user.user_id}}</td>
                             <td>{{user.username}}</td>
                             <td>{{user.email}}</td>
