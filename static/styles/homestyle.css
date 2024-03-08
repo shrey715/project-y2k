@@ -149,9 +149,8 @@ body{
 }
 
 .main-content{
-    z-index: 1;
-    padding: 0px;
-    margin-left: 3.6rem;
+    width: 96.4%;
+    margin-left: auto;
 }
 
 .search-wrapper{

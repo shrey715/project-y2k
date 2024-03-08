@@ -48,7 +48,7 @@
                 </li>
                 {% endif %}
                 <li class="sidebar-nav-item">
-                    <a href="#">
+                    <a href="{{ url_for('user_details', username=username) }}">
                         <i class='bx bxs-user-circle'></i>
                         <span class="nav-text">{{username}}</span>
                     </a>
@@ -62,19 +62,25 @@
             </ul>
         </nav>
         <div class="main-content">
-            <div id="video-preview">
-                <video id="video" controls>
-            
-                </video>
+            <div class="editor">
+                <div class="audio-image-panel">
+                    <div class="audio-selection">
+                        
+                    </div>
+                    <div class="image-selection">
+                        
+                    </div>
+                </div>
+                <div class="video-preview">
+                    
+                </div>
+                <div class="edit-panel">
+                    <div class="edit-options">
+                       
+                    </div>
+                </div>
             </div>
-            <div id="image-container">
-
-            </div>
-            <div id="audio-container">
-
-            </div>
-            <div id="video-overview">
-
+            <div class="timeline">
             </div>
         </div>
         <script src="{{ url_for('static', filename='scripts/script.js') }}" async defer></script>

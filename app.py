@@ -122,7 +122,8 @@ def login():
                 if result['password'] == hashed_password:
                     access_token = create_access_token(identity=username, expires_delta=timedelta(days=7))
                     response = make_response(jsonify({'status': 'success', 'message': 'Login successful'}))
-                    response.set_cookie('access_token_cookie', value=access_token, max_age=3600, httponly=True, path='/')
+                    response.set_cookie('access_token_cookie', value=access_token, max_age=86400, httponly=True, path='/')
+
                     session['authenticated'] = True
                     session['username'] = username
                     
@@ -192,7 +193,14 @@ def admin_dashboard():
     if current_user != 'admin':
         print("Error: Current user does not match requested user.")
         abort(403)
-    return render_template('adminportal.html', username='admin')
+    users_list = []
+    
+    with g.db.cursor() as cursor:
+        sql_get_users = "SELECT users.user_id, username, email, count(images.user_id) as image_count, count(audios.user_id) as audio_count FROM users LEFT JOIN images ON users.user_id = images.user_id LEFT JOIN audios ON users.user_id = audios.user_id GROUP BY users.user_id"
+        cursor.execute(sql_get_users)
+        users_list = cursor.fetchall()
+    return render_template('adminportal.html', username='admin', users=users_list)
+
 
 @app.route('/user_dashboard/<username>', methods=['GET'])
 @jwt_required()
@@ -292,6 +300,32 @@ def upload():
         except Exception as e:
             print("Error:", e)
             return jsonify(success=False, message="Failed to upload") 
+
+
+@app.route('/user_details/<username>', methods=['GET'])
+@jwt_required()
+def user_details(username):
+    if session['authenticated'] == False:
+        return redirect('/login')
+    current_user = get_jwt_identity()
+    if current_user != username:
+        print("Error: Current user does not match requested user.")
+        abort(403)
+    user_details = {}
+    with g.db.cursor() as cursor:
+        sql_get_user_id = "SELECT user_id, username, email FROM users WHERE username = %s"
+        cursor.execute(sql_get_user_id, (username,))
+        user_details = cursor.fetchone()
+        
+        sql_get_images = "SELECT count(*) FROM images WHERE user_id = %s"
+        cursor.execute(sql_get_images, (user_details['user_id'],))
+        images = cursor.fetchall()
+        sql_get_audios = "SELECT count(*) FROM audios WHERE user_id = %s"
+        cursor.execute(sql_get_audios, (user_details['user_id'],))
+        audios = cursor.fetchall()
+        user_details['images_cnt'] = images[0]['count(*)']
+        user_details['audios_cnt'] = audios[0]['count(*)']
+    return render_template('user_details.html', username=current_user, user_details=user_details)
 
 if __name__ == '__main__':
     db_init()
