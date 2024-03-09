@@ -1,0 +1,5 @@
+.vscode/
+.venv/
+__pycache__/
+y2k_editor/__pycache__/
+testing/
