@@ -65,15 +65,37 @@
             <div class="editor">
                 <div class="audio-image-panel">
                     <div class="audio-selection">
-                        
+                        <form action="/handle_audio_selection" method="post">
+                            {% for audio in audio_files %}
+                                <div class="audio-file">
+                                    <input type="radio" id="{{ audio }}" name="selected_audio" value="{{ audio }}">
+                                    <label for="{{ audio }}">{{ audio }}</label>
+                                    <audio controls>
+                                        <source src="{{ url_for('static', filename='audio/' + audio) }}" type="audio/mpeg">
+                                    </audio>
+                                </div>
+                            {% endfor %}
+                            <input type="submit" value="Submit">
+                        </form>
                     </div>
-                    <div class="image-selection">
-                        
-                    </div>
+                    <div class="audio-selection">
+                        <form action="/handle_audio_selection" method="post">
+                            {% for audio in audio_files %}
+                                <div class="audio-file">
+                                    <input type="radio" id="{{ audio }}" name="selected_audio" value="{{ audio }}">
+                                    <label for="{{ audio }}">{{ audio }}</label>
+                                    <audio controls>
+                                        <source src="{{ url_for('static', filename='audio/' + audio) }}" type="audio/mpeg">
+                                    </audio>
+                                </div>
+                            {% endfor %}
+                            <input type="submit" value="Submit">
+                        </form>
+                    </div>     
                 </div>
                 <div class="video-preview">
                     
-                </div>
+                </div> 
                 <div class="edit-panel">
                     <div class="edit-options">
                        
