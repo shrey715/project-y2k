@@ -6,7 +6,7 @@ Flask_SQLAlchemy==3.1.1
 Flask-WTF==1.2.1
 PyMySQL==1.1.0
 
-# Below are dependencies installed by the above packages automatically:
+# Below are dependencies automatically installed by the above packages:
 # blinker==1.7.0
 # cffi==1.16.0
 # click==8.1.7
@@ -17,5 +17,7 @@ PyMySQL==1.1.0
 # mysql-connector==2.2.9
 # pycparser==2.21
 # PyJWT==2.8.0
+# SQLAlchemy==2.0.28
+# typing_extensions==4.10.0
 # Werkzeug==3.0.1
 # WTForms==3.1.2
