@@ -296,3 +296,7 @@ body{
     cursor: pointer;
     transform: scale(1.1);
 }
+
+.main-content h2:first-child{
+    margin-top: 3rem;
+}

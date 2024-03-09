@@ -79,7 +79,7 @@
                     </thead>
                     <tbody>
                         {% for user in users %}
-                        <tr onclick="window.location='{{ url_for('user_details', username=user.username) }}';">
+                        <tr>
                             <td>{{user.user_id}}</td>
                             <td>{{user.username}}</td>
                             <td>{{user.email}}</td>

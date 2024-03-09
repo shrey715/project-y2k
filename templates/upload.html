@@ -94,18 +94,18 @@
                 addRemoveLinks: true,
                 dictDefaultMessage: 'Drag an image here to upload, or click to select one'
             };
-
+            
             Dropzone.options.audioDropzone = {
                 paramName: "audio",
                 maxFilesize: 2, 
                 addRemoveLinks: true,
                 dictDefaultMessage: 'Drag an audio file here to upload, or click to select one'
             };
-
+            
             document.getElementById("submitImage").addEventListener("click", function() {
                 Dropzone.forElement("#imageDropzone").processQueue();
             });
-        
+            
             document.getElementById("submitAudio").addEventListener("click", function() {
                 Dropzone.forElement("#audioDropzone").processQueue();
             });

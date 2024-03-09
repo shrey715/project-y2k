@@ -65,8 +65,8 @@ def db_init():
             cursor.execute('CREATE DATABASE y2k_database')
             cursor.execute('USE y2k_database')
             cursor.execute('CREATE TABLE users (user_id INT PRIMARY KEY AUTO_INCREMENT, username VARCHAR(100) UNIQUE, email VARCHAR(100) UNIQUE, password VARCHAR(64));')
-            cursor.execute('CREATE TABLE images (image_id INT PRIMARY KEY AUTO_INCREMENT, filename VARCHAR(255), user_id INT, image LONGBLOB, metadata JSON, FOREIGN KEY (user_id) REFERENCES users(user_id));')
-            cursor.execute('CREATE TABLE audios (audio_id INT PRIMARY KEY AUTO_INCREMENT, filename VARCHAR(255), user_id INT, audio LONGBLOB, metadata JSON, FOREIGN KEY (user_id) REFERENCES users(user_id));')
+            cursor.execute('CREATE TABLE images (image_id INT PRIMARY KEY AUTO_INCREMENT, filename VARCHAR(255) UNIQUE, user_id INT, image LONGBLOB, metadata JSON, FOREIGN KEY (user_id) REFERENCES users(user_id));')
+            cursor.execute('CREATE TABLE audios (audio_id INT PRIMARY KEY AUTO_INCREMENT, filename VARCHAR(255) UNIQUE, user_id INT, audio LONGBLOB, metadata JSON, FOREIGN KEY (user_id) REFERENCES users(user_id));')
             
             username = 'admin'
             email = 'admin@y2k.com'
@@ -76,6 +76,28 @@ def db_init():
             audio_files = extractAudioFiles(connection)
             connection.commit()
     connection.close()
+    
+def getImages(username):
+    with g.db.cursor() as cursor:
+        sql_get_user_id = "SELECT user_id FROM users WHERE username = %s"
+        cursor.execute(sql_get_user_id, (username,))
+        user_id = cursor.fetchone()['user_id']
+
+        sql_images = "SELECT * FROM images WHERE user_id = %s"
+        cursor.execute(sql_images, (user_id,))
+        images = cursor.fetchall()
+        return images
+        
+def getAudios(username):
+    with g.db.cursor() as cursor:
+        sql_get_user_id = "SELECT user_id FROM users WHERE username = %s"
+        cursor.execute(sql_get_user_id, (username,))
+        user_id = cursor.fetchone()['user_id']
+
+        sql_audios = "SELECT * FROM audios WHERE user_id = %s"
+        cursor.execute(sql_audios, (user_id,))
+        audios = cursor.fetchall()
+        return audios
     
 @app.before_request
 def before_request():
@@ -215,12 +237,8 @@ def user_dashboard(username):
         cursor.execute(sql_get_user_id, (username,))
         user_id = cursor.fetchone()['user_id']
 
-        sql_default_images = "SELECT * FROM images WHERE user_id = 1"
-        sql_get_images = "SELECT * FROM images WHERE user_id = %s"
-        cursor.execute(sql_get_images, (user_id,))
-        images = cursor.fetchall()
-        cursor.execute(sql_default_images)
-        default_images = cursor.fetchall()
+        default_images = getImages('admin')
+        images = getImages(username)
     return render_template('home.html', username=username, images=images, default_images=default_images)
 
 @app.route('/get_image/<image_id>', methods=['GET'])
@@ -252,7 +270,9 @@ def get_image(image_id):
 def video_editor():
     if session['authenticated'] == False:
         return redirect('/login')
-    return render_template('create_video.html',username=session['username'])
+    image_files = getImages(session['username'])
+    audio_files = getAudios(session['username'])
+    return render_template('create_video.html',username=session['username'], image_files=image_files, audio_files=audio_files)
 
 @app.route('/upload', methods=['GET','POST'])
 @jwt_required()
@@ -287,8 +307,19 @@ def upload():
                 file_data = file.read()
                 file_metadata = json.dumps({"filename": filename, "user_id": user_id, "file_type": file_type, "content-type": file.content_type})
                 table_name = f"{file_type}s" 
-                
+
                 with g.db.cursor() as cursor:
+                    sql_check_file = f"SELECT COUNT(*) FROM {table_name} WHERE filename = %s AND user_id = %s"
+                    cursor.execute(sql_check_file, (filename, user_id))
+                    count = cursor.fetchone()['COUNT(*)']
+
+                    i = 1
+                    while count > 0:
+                        filename = f"{filename}_{i}"
+                        cursor.execute(sql_check_file, (filename, user_id))
+                        count = cursor.fetchone()['COUNT(*)']
+                        i += 1
+
                     sql_insert_file = f"INSERT INTO {table_name} (filename, user_id, {file_type}, metadata) VALUES (%s, %s, %s, %s)"
                     cursor.execute(sql_insert_file, (filename, user_id, file_data, file_metadata))
                     print("File uploaded")
