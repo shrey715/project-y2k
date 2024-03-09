@@ -68,28 +68,77 @@
                     <input id="searchbar" type="search" placeholder="Search">
                 </div>
             </header>
-            <div class="image-gallery-header">
-                <p>Default Images</p>
+            <div class="search-results invisible">
+                <div class="search-results-header">
+                    <p>Search Results</p>
+                </div>
+                <div class="image_gallery" id="search-results">
+                </div>
             </div>
-            <div class="image_gallery">
-                {% for image in default_images %}
-                    <div class="image-container">
-                        <img src="{{ url_for('get_image',image_id=image['image_id']) }}" alt="image">
-                    </div>
-                {% endfor %}
-            </div>
-            <hr>
-            <div class="image-gallery-header">
-                <p>Your Images</p>
-            </div>
-            <div class="image_gallery">
-                {% for image in images %}
-                    <div class="image-container">
-                        <img src="{{ url_for('get_image',image_id=image['image_id']) }}" alt="image">
-                    </div>
-                {% endfor %} 
+            <div class="non-search-results">
+                <div class="image-gallery-header">
+                    <p>Default Images</p>
+                </div>
+                <div class="image_gallery">
+                    {% for image in default_images %}
+                        <div class="image-container" id="image-{{ image['image_id'] }}">
+                            <img src="{{ url_for('get_image',image_id=image['image_id']) }}" alt="image" data-filename="{{ image['filename'] }}">
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="image-gallery-header">
+                    <p>Your Images</p>
+                </div>
+                <div class="image_gallery">
+                    {% for image in images %}
+                        <div class="image-container" id="image-{{ image['image_id'] }}">
+                            <img src="{{ url_for('get_image',image_id=image['image_id']) }}" alt="image" data-filename="{{ image['filename'] }}">
+                        </div>
+                    {% endfor %} 
+                </div>
             </div>
         </div>
         <script src="{{ url_for('static', filename='scripts/script.js') }}" async defer></script>
+        <script>
+            var searchbar = document.getElementById('searchbar');
+            var galleries = document.getElementsByClassName('image_gallery');
+            var headers = document.getElementsByClassName('image-gallery-header');
+            var searchResults = document.getElementById('search-results');
+        
+            function searchImage() {
+                // Get the search text
+                var searchText = searchbar.value.toLowerCase();
+        
+                // Loop through all the images in the galleries
+                for (var i = 0; i < galleries.length; i++) {
+                    var images = galleries[i].getElementsByTagName('img');
+                    for (var j = 0; j < images.length; j++) {
+                        var filename = images[j].getAttribute('data-filename').toLowerCase();
+        
+                        // If the filename includes the search text, show the image
+                        if (filename.includes(searchText)) {
+                            images[j].parentElement.style.display = 'block';
+                        } else {
+                            // Otherwise, hide the image
+                            images[j].parentElement.style.display = 'none';
+                        }
+                    }
+                }
+        
+                // If the search bar is not empty, hide the headers and show the search results
+                if (searchText) {
+                    for (var i = 0; i < headers.length; i++) {
+                        headers[i].style.display = 'none';
+                    }
+                    searchResults.style.display = 'block';
+                } else {
+                    // Otherwise, show the headers and hide the search results
+                    for (var i = 0; i < headers.length; i++) {
+                        headers[i].style.display = 'block';
+                    }
+                    searchResults.style.display = 'none';
+                }
+            }
+        </script>
     </body>
 </html>

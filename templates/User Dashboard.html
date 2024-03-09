@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>User Dashboard</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="User%20Dashboard_files/boxicons.min.css" rel="stylesheet">
+        <link rel="icon" href="http://127.0.0.1:5000/static/images/logo.ico" type="image/x-icon">
+        <link rel="stylesheet" href="User%20Dashboard_files/homestyle.css">
+    </head>
+    <body>
+        <nav class="sidebar">
+            <ul class="sidebar-nav">
+                <div class="sidebar-logo">
+                    <img src="User%20Dashboard_files/logo-no-text.png" alt="logo">
+                </div>
+                <button class="sidebar-close" onclick="toggleMenu()">
+                    <i id="sidebar-btn" class="bx bxs-chevrons-right"></i>
+                </button>
+                <li class="sidebar-nav-item">
+                    <a href="http://127.0.0.1:5000/user_dashboard/shreyas">
+                        <i class="bx bx-home-alt-2"></i>
+                        <span class="nav-text">Home</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="http://127.0.0.1:5000/video_editor">
+                        <i class="bx bx-video-plus"></i>
+                        <span class="nav-text">Video Editor</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="http://127.0.0.1:5000/upload">
+                        <i class="bx bx-image"></i>
+                        <span class="nav-text">Upload Images/Audio</span>
+                    </a>
+                </li>
+            </ul>
+            <ul>
+                
+                <li class="sidebar-nav-item">
+                    <a href="http://127.0.0.1:5000/user_details/shreyas">
+                        <i class="bx bxs-user-circle"></i>
+                        <span class="nav-text">shreyas</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="http://127.0.0.1:5000/logout">
+                        <i class="bx bx-log-out"></i>
+                        <span class="nav-text">Logout</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <div class="main-content">
+            <header>
+                <div class="search-wrapper">
+                    <i class="bx bx-search" onclick="searchImage()"></i>
+                    <input id="searchbar" type="search" placeholder="Search">
+                </div>
+            </header>
+            <div class="image-gallery-header">
+                <p>Default Images</p>
+            </div>
+            <div class="image_gallery">
+                
+                    <div class="image-container">
+                        <img src="User%20Dashboard_files/3.png" alt="image" data-filename="Screenshot_from_2024-03-08_11-40-19.png">                    </div>
+                    </div>
+                
+                    <div class="image-container">
+                        <img src="User%20Dashboard_files/4.png" alt="image" data-filename="Screenshot_from_2024-03-09_19-04-16.png">                    </div>
+                    </div>
+                
+                    <div class="image-container">
+                        <img src="User%20Dashboard_files/5.png" alt="image" data-filename="Screenshot_from_2024-03-08_11-40-08.png">                    </div>
+                    
+                
+                    <div class="image-container">
+                        <img src="User%20Dashboard_files/6.png" alt="image" data-filename="Screenshot_from_2024-03-08_00-15-20.png">                    </div>
+                    
+                
+                    <div class="image-container">
+                        <img src="User%20Dashboard_files/7.png" alt="image" data-filename="Screenshot_from_2024-03-07_19-22-55.png">                    </div>
+                    
+                
+                    <div class="image-container">
+                        <img src="User%20Dashboard_files/8.png" alt="image" data-filename="Screenshot_from_2024-03-06_23-27-00.png">                    </div>
+                    
+                
+                    <div class="image-container">
+                        <img src="User%20Dashboard_files/9.png" alt="image" data-filename="Screenshot_from_2024-03-08_11-40-19.png">                    </div>
+                    
+                
+                    <div class="image-container">
+                        <img src="User%20Dashboard_files/10.png" alt="image" data-filename="Screenshot_from_2024-03-09_19-04-16.png">                    </div>
+                    
+                
+                    <div class="image-container">
+                        <img src="User%20Dashboard_files/11.png" alt="image" data-filename="Screenshot_from_2024-03-08_11-40-08.png">                    </div>
+                    
+                
+                    <div class="image-container">
+                        <img src="User%20Dashboard_files/12.png" alt="image" data-filename="Screenshot_from_2024-03-09_19-04-16.png">                    </div>
+                    
+                
+            
+            <hr>
+            <div class="image-gallery-header">
+                <p>Your Images</p>
+            </div>
+            <div class="image_gallery">
+                 
+            </div>
+        
+        <script src="User%20Dashboard_files/script.js" async="" defer="defer"></script>
+        <script>
+            function searchImage() {
+                var input = document.getElementById('searchbar').value.toLowerCase();
+            
+                var images = document.getElementsByTagName('img');
+            
+                for (var i = 0; i < images.length; i++) {
+                    var filename = images[i].getAttribute('data-filename').toLowerCase();
+            
+                    var container = document.getElementById('image-' + images[i].getAttribute('data-id'));
+            
+                    if (filename.includes(input)) {
+                        container.style.display = 'block';
+                    } else {
+                        container.style.display = 'none';
+                    }
+                }
+            }
+            document.getElementById('searchbar').addEventListener('input', searchImage);
+        </script>
+    
+</body></html>

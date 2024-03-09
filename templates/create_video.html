@@ -68,30 +68,28 @@
                         <form action="/handle_audio_selection" method="post">
                             {% for audio in audio_files %}
                                 <div class="audio-file">
-                                    <input type="radio" id="{{ audio }}" name="selected_audio" value="{{ audio }}">
-                                    <label for="{{ audio }}">{{ audio }}</label>
+                                    <input type="radio" id="{{ audio.name }}" name="selected_audio" value="{{ audio.name }}">
+                                    <label for="{{ audio.name }}">{{ audio.name }}</label>
                                     <audio controls>
-                                        <source src="{{ url_for('static', filename='audio/' + audio) }}" type="audio/mpeg">
+                                        <source src="data:audio/mpeg;base64,{{ audio.data|safe }}" type="audio/mpeg">
                                     </audio>
                                 </div>
                             {% endfor %}
                             <input type="submit" value="Submit">
                         </form>
                     </div>
-                    <div class="audio-selection">
-                        <form action="/handle_audio_selection" method="post">
-                            {% for audio in audio_files %}
-                                <div class="audio-file">
-                                    <input type="radio" id="{{ audio }}" name="selected_audio" value="{{ audio }}">
-                                    <label for="{{ audio }}">{{ audio }}</label>
-                                    <audio controls>
-                                        <source src="{{ url_for('static', filename='audio/' + audio) }}" type="audio/mpeg">
-                                    </audio>
+                    <div class="image-selection">
+                        <form action="/handle_image_selection" method="post">
+                            {% for image in image_files %}
+                                <div class="image-file">
+                                    <input type="radio" id="{{ image.name }}" name="selected_image" value="{{ image.name }}">
+                                    <label for="{{ image.name }}">{{ image.name }}</label>
+                                    <img src="data:image/png;base64,{{ image.data|safe }}" alt="{{ image.name }}">
                                 </div>
                             {% endfor %}
                             <input type="submit" value="Submit">
                         </form>
-                    </div>     
+                    </div>
                 </div>
                 <div class="video-preview">
                     

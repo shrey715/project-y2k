@@ -9,7 +9,6 @@ import hashlib
 import os
 import glob
 import json
-import video_creator as vc
 
 app=Flask(__name__)
 app.config["JWT_TOKEN_LOCATION"] = ["headers", "cookies", "json", "query_string"]
