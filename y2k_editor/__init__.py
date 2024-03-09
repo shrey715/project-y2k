@@ -1,15 +1,20 @@
 from flask import g, Flask, render_template, request, redirect, url_for, make_response, abort, session, jsonify
 from flask_jwt_extended import JWTManager, unset_jwt_cookies, create_access_token, jwt_required, get_jwt_identity, decode_token
+from flask_sqlalchemy import SQLAlchemy
 from datetime import timedelta
 from flask_cors import CORS
 from flask_wtf.csrf import CSRFProtect
 from werkzeug.utils import secure_filename
+from urllib.parse import quote_plus as _parse_quote_plus
 import pymysql  
 import hashlib
 import os
 import glob
 import json
-import video_creator as vc
+import y2k_editor.db_credentials as _dbcred     # MySQL credentials
+# import y2k_editor.video_creator as vc
+
+# BIG TODO Refactor
 
 app=Flask(__name__)
 app.config["JWT_TOKEN_LOCATION"] = ["headers", "cookies", "json", "query_string"]
@@ -21,10 +26,39 @@ app.config['JWT_COOKIE_CSRF_PROTECT'] = False
 app.config['SESSION_COOKIE_DOMAIN'] = None
 app.config['SESSION_COOKIE_SAMESITE'] = 'None'
 app.config['SESSION_COOKIE_SECURE'] = True
-session={'authenticated': False,'username': ''}
 jwt = JWTManager(app)
 csrf = CSRFProtect(app)
 CORS(app)
+
+session={'authenticated': False,'username': ''}     #f00 BIG TODO CHANGE!
+
+# -----
+
+"""
+The `db_credentials.py` module contains the credentials for the MySQL server
+running on the system. Each dev machine needs to have its own module with its
+respective MySQL credentials set up in the file. To do this, create the file
+`db_credentials.py` (in the same directory as this module) and appropriately
+set the variables `username` (usually 'root'), `password` and the `db_name`
+(like, 'y2k_alchemy') you want for the SQLAlchemy-based database.
+Note: If you do wanna test this out, do NOT use the same db_name as the current
+(PyMySQL implementation) as table structures are different in the new implementation.
+Ensure the database already exists, as well, before running this file (for now).
+"""
+# Uncomment the 5 lines below to enable SQLAlchemy implementation (does nothing for now)
+
+# app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{_dbcred.username}:{_parse_quote_plus(_dbcred.password)}@localhost/{_dbcred.db_name}'
+# app.app_context().push()
+# db = SQLAlchemy(app)
+
+# from y2k_editor.models import User, Audio, Image, DBProject
+
+# db.create_all()
+
+# -----
+
+### BIG TODO REFACTORRR
+
 
 def extractAudioFiles(connection):
     directory = 'static/audio/preloaded'
@@ -50,15 +84,15 @@ def extractAudioFiles(connection):
 def db_init():
     try: 
         connection = pymysql.connect(host='localhost',
-                                            user='root',
-                                            password='Noshu@1211',
-                                            db='y2k_database',
+                                            user=_dbcred.username,
+                                            password=_dbcred.password,
+                                            db='y2k_database',  # Uses the same old name
                                             charset='utf8mb4',
                                             cursorclass=pymysql.cursors.DictCursor)
     except Exception as e:
         connection = pymysql.connect(host='localhost',
-                                            user='root',
-                                            password='Noshu@1211',
+                                            user=_dbcred.username,
+                                            password=_dbcred.password,
                                             charset='utf8mb4',
                                             cursorclass=pymysql.cursors.DictCursor)
         with connection.cursor() as cursor:
@@ -81,7 +115,7 @@ def db_init():
 def before_request():
     g.db = pymysql.connect(host='localhost',
                            user='root',
-                           password='Noshu@1211',
+                           password='agn@Nadu.1711',
                            db='y2k_database',
                            charset='utf8mb4',
                            cursorclass=pymysql.cursors.DictCursor)
@@ -326,7 +360,3 @@ def user_details(username):
         user_details['images_cnt'] = images[0]['count(*)']
         user_details['audios_cnt'] = audios[0]['count(*)']
     return render_template('user_details.html', username=current_user, user_details=user_details)
-
-if __name__ == '__main__':
-    db_init()
-    app.run(debug=True)
