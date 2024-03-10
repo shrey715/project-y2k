@@ -263,6 +263,27 @@ def get_image(image_id):
         print("Error:", e)
         return jsonify(success=False, message="Failed to get image")
             
+@app.route('/delete_images')
+@jwt_required()
+@csrf.exempt
+def delete_images():
+    if session['authenticated'] == False:
+        return redirect('/login')
+    try:
+        data = request.args.get('image_ids')
+        if not data:
+            return jsonify(success=False, message="No image selected")
+        image_ids = [int(x) for x in data.split(',')]
+        
+        with g.db.cursor() as cursor:
+            sql_delete_images = "DELETE FROM images WHERE image_id IN %s"
+            cursor.execute(sql_delete_images, (image_ids,))
+            g.db.commit()
+            return jsonify(success=True, message="Images deleted successfully")
+    except Exception as e:
+        print("Error:", e)
+        return jsonify(success=False, message="Failed to delete images")
+        
 @app.route('/video_editor', methods=['GET'])
 @jwt_required()
 @csrf.exempt

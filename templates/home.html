@@ -68,11 +68,11 @@
                     <input id="searchbar" type="search" placeholder="Search">
                 </div>
             </header>
-            <div class="search-results invisible">
+            <div  id="search-results" class="search-results invisible">
                 <div class="search-results-header">
                     <p>Search Results</p>
                 </div>
-                <div class="image_gallery" id="search-results">
+                <div class="image_gallery">
                 </div>
             </div>
             <div class="non-search-results">
@@ -83,6 +83,8 @@
                     {% for image in default_images %}
                         <div class="image-container" id="image-{{ image['image_id'] }}">
                             <img src="{{ url_for('get_image',image_id=image['image_id']) }}" alt="image" data-filename="{{ image['filename'] }}">
+                            <input type="checkbox" id="checkbox-{{ image['image_id'] }}" class="image-checkbox" data-image-id="{{ image['image_id'] }}">
+                            <label for="checkbox-{{ image['image_id'] }}"></label>
                         </div>
                     {% endfor %}
                 </div>
@@ -93,8 +95,16 @@
                     {% for image in images %}
                         <div class="image-container" id="image-{{ image['image_id'] }}">
                             <img src="{{ url_for('get_image',image_id=image['image_id']) }}" alt="image" data-filename="{{ image['filename'] }}">
+                            <input type="checkbox" id="checkbox-{{ image['image_id'] }}" class="image-checkbox" data-image-id="{{ image['image_id'] }}">
+                            <label for="checkbox-{{ image['image_id'] }}"></label>   
                         </div>
-                    {% endfor %} 
+                    {% endfor %}
+                </div>
+                <div id="video-bar" onclick="createVideo()">
+                    <span>Create Video</span>
+                </div>
+                <div id="delete-images" onclick="deleteImages()">
+                    <span>Delete Images</span>
                 </div>
             </div>
         </div>
@@ -102,42 +112,92 @@
         <script>
             var searchbar = document.getElementById('searchbar');
             var galleries = document.getElementsByClassName('image_gallery');
-            var headers = document.getElementsByClassName('image-gallery-header');
             var searchResults = document.getElementById('search-results');
+            var nonSearchResults = document.querySelector('.non-search-results');
         
             function searchImage() {
-                // Get the search text
                 var searchText = searchbar.value.toLowerCase();
         
-                // Loop through all the images in the galleries
+                searchResults.innerHTML = '';
+                var resultsGallery = document.createElement('div');
+                resultsGallery.className = 'image_gallery';
+        
                 for (var i = 0; i < galleries.length; i++) {
                     var images = galleries[i].getElementsByTagName('img');
                     for (var j = 0; j < images.length; j++) {
                         var filename = images[j].getAttribute('data-filename').toLowerCase();
         
-                        // If the filename includes the search text, show the image
                         if (filename.includes(searchText)) {
-                            images[j].parentElement.style.display = 'block';
-                        } else {
-                            // Otherwise, hide the image
-                            images[j].parentElement.style.display = 'none';
+                            resultsGallery.appendChild(images[j].parentElement.cloneNode(true));
                         }
                     }
                 }
         
-                // If the search bar is not empty, hide the headers and show the search results
+                searchResults.appendChild(resultsGallery);
+        
                 if (searchText) {
-                    for (var i = 0; i < headers.length; i++) {
-                        headers[i].style.display = 'none';
-                    }
+                    nonSearchResults.style.display = 'none';
                     searchResults.style.display = 'block';
                 } else {
-                    // Otherwise, show the headers and hide the search results
-                    for (var i = 0; i < headers.length; i++) {
-                        headers[i].style.display = 'block';
-                    }
+                    nonSearchResults.style.display = 'block';
                     searchResults.style.display = 'none';
                 }
+            }
+        
+            searchbar.addEventListener('focus', function() {
+                nonSearchResults.style.display = 'none';
+                searchResults.style.display = 'block';
+            });
+        
+            searchbar.addEventListener('blur', function() {
+                if (!searchbar.value) {
+                    nonSearchResults.style.display = 'block';
+                    searchResults.style.display = 'none';
+                }
+            });
+
+            var checkboxes = document.getElementsByClassName('image-checkbox');
+            var videoBar = document.getElementById('video-bar');
+            var deleteBar = document.getElementById('delete-images');
+
+            for (var i = 0; i < checkboxes.length; i++) {
+                checkboxes[i].addEventListener('change', function() {
+                    for (var j = 0; j < checkboxes.length; j++) {
+                        if (checkboxes[j].checked) {
+                            videoBar.classList.add('visible');
+                            deleteBar.classList.add('visible');
+                            return;
+                        }
+                    }
+                    videoBar.classList.remove('visible');
+                    deleteBar.classList.remove('visible');
+                });
+            }
+
+            function deleteImages() {
+                var imageIds = [];
+                for (var i = 0; i < checkboxes.length; i++) {
+                    if (checkboxes[i].checked) {
+                        imageIds.push(checkboxes[i].getAttribute('data-image-id'));
+                    }
+                }
+                fetch('/delete_images?image_ids=' + imageIds.join(','), {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    if (data.success) {
+                        location.reload();
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
             }
         </script>
     </body>
