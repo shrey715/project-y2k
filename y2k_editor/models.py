@@ -9,7 +9,7 @@ class User(db.Model):
     password = db.Column(db.String(64), nullable=False)
     
     def __repr__(self):
-        return f"User('{self.username}', '{self.email}')"
+        return f"User({self.id}, '{self.username}', '{self.email}')"
 
 class Image(db.Model):
     __tablename__ = 'image'
@@ -21,7 +21,7 @@ class Image(db.Model):
     used_in_projects = db.Column(db.Integer, default=0)
     
     def __repr__(self):
-        return f"Image('{self.filename}', '{self.user_id}')"
+        return f"Image('{self.filename}', user_id={self.user_id})"
 
 class Audio(db.Model):
     __tablename__ = 'audio'

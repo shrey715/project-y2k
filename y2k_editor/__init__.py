@@ -1,4 +1,4 @@
-from flask import g, Flask, render_template, request, redirect, url_for, make_response, abort, session, jsonify
+from flask import g, Flask, render_template, request, redirect, url_for, make_response, abort, session as sesh, jsonify
 from flask_jwt_extended import JWTManager, unset_jwt_cookies, create_access_token, jwt_required, get_jwt_identity, decode_token
 from flask_sqlalchemy import SQLAlchemy
 from datetime import timedelta
@@ -15,6 +15,7 @@ import y2k_editor.db_credentials as _dbcred     # MySQL credentials
 # import y2k_editor.video_creator as vc
 
 # BIG TODO Refactor
+
 
 app=Flask(__name__)
 app.config["JWT_TOKEN_LOCATION"] = ["headers", "cookies", "json", "query_string"]
@@ -33,34 +34,35 @@ CORS(app)
 session={'authenticated': False,'username': ''}     #f00 BIG TODO CHANGE!
 
 # -----
-
 """
 The `db_credentials.py` module contains the credentials for the MySQL server
 running on the system. Each dev machine needs to have its own module with its
-respective MySQL credentials set up in the file. To do this, create the file
-`db_credentials.py` (in the same directory as this module) and appropriately
-set the variables `username` (usually 'root'), `password` and the `db_name`
-(like, 'y2k_alchemy') you want for the SQLAlchemy-based database.
+respective MySQL credentials set up in the file.
+
+To do this, create the file `db_credentials.py` (in the same directory as this module)
+and appropriately set the variables `username` (usually 'root'), `password`, `host`
+(usually 'localhost') and `db_name` (say, 'y2k_alchemy') you want for the
+SQLAlchemy-based MySQL database.
+
 Note: If you do wanna test this out, do NOT use the same db_name as the current
 (PyMySQL implementation) as table structures are different in the new implementation.
-Ensure the database already exists, as well, before running this file (for now).
+Also, ensure (for now) that the database already exists before running this file.
 """
-# Uncomment the 5 lines below to enable SQLAlchemy implementation (does nothing for now)
+# Uncomment the 5 lines below to enable SQLAlchemy implementation (changes nothing for now)
 
 # app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{_dbcred.username}:{_parse_quote_plus(_dbcred.password)}@localhost/{_dbcred.db_name}'
-# app.app_context().push()
 # db = SQLAlchemy(app)
 
 # from y2k_editor.models import User, Audio, Image, DBProject
-
-# db.create_all()
+# with app.app_context():
+    # db.create_all()
 
 # -----
 
 ### BIG TODO REFACTORRR
 
 
-def extractAudioFiles(connection):
+def loadPreloadedLibrary(connection):
     directory = 'static/audio/preloaded'
     audio_files = glob.glob(os.path.join(directory, '*.mp3'))
 
@@ -107,7 +109,7 @@ def db_init():
             hashed_password = hashlib.sha256('admin'.encode()).hexdigest()
             cursor.execute('INSERT INTO users (username, email, password) VALUES (%s, %s, %s)', (username, email, hashed_password))
             
-            audio_files = extractAudioFiles(connection)
+            loadPreloadedLibrary(connection)
             connection.commit()
     connection.close()
     
@@ -130,11 +132,23 @@ def teardown_request(exception):
 def index():
     return render_template('index.html')
 
+@app.before_request
+def testing():
+    print(list(sesh.items()))
+    ...
+
 @app.route('/login', methods=['GET', 'POST'])
 @csrf.exempt
 def login():
-    if session['authenticated']:
-        return redirect(f'/user_dashboard/{session["username"]}')
+    cookie = request.cookies.get('access_token_cookie')
+    print('cookie:', cookie)
+    if cookie:
+        token = decode_token(cookie)
+        print('token:', token)
+        return redirect(f"user_dashboard")
+    
+    # if session['authenticated']:
+    #     return redirect(f'/user_dashboard')
     if request.method == 'POST':
         try:
             data = request.form
@@ -154,9 +168,10 @@ def login():
 
                 hashed_password = hashlib.sha256(password.encode()).hexdigest()                
                 if result['password'] == hashed_password:
-                    access_token = create_access_token(identity=username, expires_delta=timedelta(days=7))
+                    expireTime = 86400
+                    access_token = create_access_token(identity=username, expires_delta=timedelta(seconds=expireTime))
                     response = make_response(jsonify({'status': 'success', 'message': 'Login successful'}))
-                    response.set_cookie('access_token_cookie', value=access_token, max_age=86400, httponly=True, path='/')
+                    response.set_cookie('access_token_cookie', value=access_token, max_age=expireTime, httponly=True, path='/')
 
                     session['authenticated'] = True
                     session['username'] = username
@@ -181,8 +196,15 @@ def logout():
 @app.route('/signup', methods=['GET', 'POST'])
 @csrf.exempt
 def signup():
-    if session.get('authenticated', False):
-        return redirect(f'/user_dashboard/{session["username"]}')
+    cookie = request.cookies.get('access_token_cookie')
+    print('cookie:', cookie)
+    if cookie:
+        token = decode_token(cookie)
+        print('token:', token)
+        return redirect(f"user_dashboard")
+    
+    # if session.get('authenticated', False):
+    #     return redirect(f'/user_dashboard')
     if request.method == 'POST':
         try:
             data = request.form
@@ -236,15 +258,22 @@ def admin_dashboard():
     return render_template('adminportal.html', username='admin', users=users_list)
 
 
-@app.route('/user_dashboard/<username>', methods=['GET'])
+@app.route('/user_dashboard', methods=['GET'])
 @jwt_required()
-def user_dashboard(username):
-    if session['authenticated'] == False:
-        return redirect('/login')
-    current_user = get_jwt_identity()
-    if current_user != username:
-        print("Error: Current user does not match requested user.")
-        abort(403)
+def user_dashboard():
+    cookie = request.cookies.get('access_token_cookie')
+    # print('cookie:', cookie)
+    if not cookie:
+        return redirect('login')
+
+    # if session['authenticated'] == False:
+    #     return redirect('/login')
+    
+    username = get_jwt_identity()
+    # username = decode_token(cookie).get('sub')
+    # if current_username != username:
+    #     print("Error: Current user does not match requested user.")
+    #     abort(403)
     images = []
     with g.db.cursor() as cursor:
         sql_get_user_id = "SELECT user_id FROM users WHERE username = %s"
@@ -263,8 +292,13 @@ def user_dashboard(username):
 @jwt_required()
 @csrf.exempt
 def get_image(image_id):
-    if session['authenticated'] == False:
-        return redirect('/login')
+    cookie = request.cookies.get('access_token_cookie')
+    # print('cookie:', cookie)
+    if not cookie:
+        return redirect('login')
+    
+    # if session['authenticated'] == False:
+    #     return redirect('/login')
     try:
         with g.db.cursor() as cursor:
             sql_get_image = "SELECT * FROM images WHERE image_id = %s"
@@ -281,7 +315,7 @@ def get_image(image_id):
     except Exception as e:
         print("Error:", e)
         return jsonify(success=False, message="Failed to get image")
-            
+
 @app.route('/video_editor', methods=['GET'])
 @jwt_required()
 @csrf.exempt
@@ -294,10 +328,16 @@ def video_editor():
 @jwt_required()
 @csrf.exempt
 def upload():
-    if session['authenticated'] == False:
-        return redirect('/login')
+    # if session['authenticated'] == False:
+    #     return redirect('/login')
+    
+    cookie = request.cookies.get('access_token_cookie')
+    if not cookie:
+        return redirect('login')
+    
+    username = decode_token(cookie).get('sub')
     if request.method == 'GET':
-        return render_template('upload.html', username=session['username'])
+        return render_template('upload.html', username=username)
     if request.method == 'POST':
         try:
             file_type = request.form.get('file_type')
@@ -310,7 +350,6 @@ def upload():
             if not files:
                 return jsonify(success=False, message="No files uploaded")
 
-            username = session.get('username')
             user_id = None
             
             with g.db.cursor() as cursor:

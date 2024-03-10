@@ -3,3 +3,4 @@
 __pycache__/
 y2k_editor/__pycache__/
 testing/
+y2k_editor/db_credentials.py
