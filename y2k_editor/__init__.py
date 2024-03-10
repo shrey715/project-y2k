@@ -39,14 +39,10 @@ The `db_credentials.py` module contains the credentials for the MySQL server
 running on the system. Each dev machine needs to have its own module with its
 respective MySQL credentials set up in the file.
 
-To do this, create the file `db_credentials.py` (in the same directory as this module)
-and appropriately set the variables `username` (usually 'root'), `password`, `host`
-(usually 'localhost') and `db_name` (say, 'y2k_alchemy') you want for the
-SQLAlchemy-based MySQL database.
+To do this, create the file `db_credentials.py` (in the same directory as this module).
+Check the sample file `db_credentials.sample.py` for the expected format of the file.
 
-Note: If you do wanna test this out, do NOT use the same db_name as the current
-(PyMySQL implementation) as table structures are different in the new implementation.
-Also, ensure (for now) that the database already exists before running this file.
+Note: IRead the note in `db_credentials.sample.py`
 """
 # Uncomment the 5 lines below to enable SQLAlchemy implementation (changes nothing for now)
 
