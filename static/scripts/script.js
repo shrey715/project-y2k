@@ -14,3 +14,4 @@ function toggleProfile(){
     var profile = document.getElementById("profileDropdown");
     profile.classList.toggle("show-profile");
 }
+
