@@ -1,6 +1,27 @@
+# Ignore VS Code settings
 .vscode/
+
+# Ignore virtual environment
 .venv/
+
+# Ignore Python cache files
 __pycache__/
 y2k_editor/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyc.so
+
+# Ignore Python distribution artifacts
+dist/
+build/
+*.egg-info/
+
+# Ignore any Python environments
+*.env
+.env/
+
+# Ignore personal testing/credentials directories
+# Do all your code testing inside testing/ directory
 testing/
 y2k_editor/db_credentials.py
