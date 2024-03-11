@@ -14,6 +14,9 @@
     border: 2px dashed var(--color-cyan);
     border-radius: 10px;
     background-color: var(--color-menu);
+    box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
+    backdrop-filter: blur( 10px );
+    -webkit-backdrop-filter: blur( 10px );
     color: var(--color-white);
     transition: all 0.3s ease-in-out;
 }
@@ -60,6 +63,9 @@
     border: 2px dashed var(--color-pink);
     border-radius: 10px;
     background-color: var(--color-menu);
+    box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
+    backdrop-filter: blur( 10px );
+    -webkit-backdrop-filter: blur( 10px );
     color: var(--color-white);
     transition: all 0.3s ease-in-out;
 }
@@ -140,6 +146,14 @@
     color: var(--color-white);
     cursor: pointer;
     transform: scale(1.1);
+}
+
+.main-content h2{
+    margin-top: 1rem;
+    font-size: 1.7rem;
+    font-weight: 600;
+    color: var(--color-white);
+    transition: all 0.3s ease-in-out;
 }
 
 .main-content h2:first-child{

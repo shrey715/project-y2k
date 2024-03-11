@@ -216,7 +216,7 @@ def admin_dashboard():
     users_list = []
     
     with g.db.cursor() as cursor:
-        sql_get_users = "SELECT users.user_id, username, email, count(images.user_id) as image_count, count(audios.user_id) as audio_count FROM users LEFT JOIN images ON users.user_id = images.user_id LEFT JOIN audios ON users.user_id = audios.user_id GROUP BY users.user_id"
+        sql_get_users = "SELECT users.user_id, username, email, (SELECT COUNT(*) FROM images WHERE users.user_id = images.user_id) as image_count, (SELECT COUNT(*) FROM audios WHERE users.user_id = audios.user_id) as audio_count FROM users;"
         cursor.execute(sql_get_users)
         users_list = cursor.fetchall()
     return render_template('adminportal.html', username='admin', users=users_list)
@@ -374,6 +374,24 @@ def user_details(username):
         user_details['images_cnt'] = images[0]['count(*)']
         user_details['audios_cnt'] = audios[0]['count(*)']
     return render_template('user_details.html', username=current_user, user_details=user_details)
+
+@app.route('/images-audio-database', methods=['GET'])
+@jwt_required()
+def images_audio_database():
+    current_user = get_jwt_identity()
+    if current_user != 'admin':
+        print("Error: Current user does not match requested user.")
+        abort(403)
+    images = []
+    audios = []
+    with g.db.cursor() as cursor:
+        sql_images = "SELECT * FROM images"
+        cursor.execute(sql_images)
+        images = cursor.fetchall()
+        sql_audios = "SELECT * FROM audios"
+        cursor.execute(sql_audios)
+        audios = cursor.fetchall()
+    return render_template('images_audio_database.html', username='admin', images=images, audios=audios)
 
 if __name__ == '__main__':
     db_init()

@@ -5,6 +5,7 @@
 
 :root{
     --color-background: #191919;
+    --color-black: #222;
     --color-cyan: #45f3ff;
     --color-pink: #ff2770;
     --color-white: #fff;
@@ -16,15 +17,15 @@
     --color-blue: #23a6d5;
 }
 
-*{
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 400;
-}
-
 body{
     background: var(--color-background);
     margin: 0;
     overflow-x: hidden;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--color-white);
+    font-size: 600;
+    overflow-y: scroll;
+    height: auto;
 }
 
 .sidebar {
@@ -143,7 +144,8 @@ body{
 }
 
 .main-content{
-    width: 96.4%;
+    width: 96%;
+    height: 100%;
     margin-left: auto;
     display: flex;
     flex-direction: column;
