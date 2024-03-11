@@ -7,6 +7,18 @@
     display: block;
 }
 
+.main-content h3{
+    font-size: 2rem;
+    color: var(--color-white);
+    padding: 1rem;
+    animation: pulsate 2s infinite;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
 .main-content header{
     font-family: 'Bungee', cursive;
     font-size: 2rem;

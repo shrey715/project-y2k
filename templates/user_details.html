@@ -23,7 +23,7 @@
                 <li class="sidebar-nav-item">
                     <a href={{ url_for('user_dashboard', username=username) }}>
                         <i class='bx bx-home-alt-2' ></i>
-                        <span class="nav-text">Home</span>
+                        <span class="nav-text">Dashboard</span>
                     </a>
                 </li>
                 <li class="sidebar-nav-item">
@@ -34,7 +34,7 @@
                 </li>
                 <li class="sidebar-nav-item">
                     <a href={{ url_for('upload') }}>
-                        <i class='bx bx-image' ></i>
+                        <i class='bx bx-upload' ></i>
                         <span class="nav-text">Upload Images/Audio</span>
                     </a>
                 </li>
@@ -45,6 +45,12 @@
                     <a href={{ url_for('admin_dashboard') }}>
                         <i class='bx bxs-report'></i>
                         <span class="nav-text">Admin Dashboard</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href={{ url_for('images_audio_database') }}>
+                        <i class='bx bx-data' ></i>
+                        <span class="nav-text">Media Database</span>
                     </a>
                 </li>
                 {% endif %}

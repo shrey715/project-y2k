@@ -23,7 +23,7 @@
                 <li class="sidebar-nav-item">
                     <a href={{ url_for('user_dashboard', username=username) }}>
                         <i class='bx bx-home-alt-2' ></i>
-                        <span class="nav-text">Home</span>
+                        <span class="nav-text">Dashboard</span>
                     </a>
                 </li>
                 <li class="sidebar-nav-item">
@@ -34,7 +34,7 @@
                 </li>
                 <li class="sidebar-nav-item">
                     <a href={{ url_for('upload') }}>
-                        <i class='bx bx-image' ></i>
+                        <i class='bx bx-upload'></i>
                         <span class="nav-text">Upload Images/Audio</span>
                     </a>
                 </li>
@@ -45,6 +45,12 @@
                     <a href={{ url_for('admin_dashboard') }}>
                         <i class='bx bxs-report'></i>
                         <span class="nav-text">Admin Dashboard</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href={{ url_for('images_audio_database') }}>
+                        <i class='bx bx-data' ></i>
+                        <span class="nav-text">Media Database</span>
                     </a>
                 </li>
                 {% endif %}
@@ -66,30 +72,10 @@
             <div class="editor">
                 <div class="audio-image-panel">
                     <div class="audio-selection">
-                        <form action="/handle_audio_selection" method="post">
-                            {% for audio in audio_files %}
-                                <div class="audio-file">
-                                    <input type="radio" id="{{ audio.name }}" name="selected_audio" value="{{ audio.name }}">
-                                    <label for="{{ audio.name }}">{{ audio.name }}</label>
-                                    <audio controls>
-                                        <source src="data:audio/mpeg;base64,{{ audio.data|safe }}" type="audio/mpeg">
-                                    </audio>
-                                </div>
-                            {% endfor %}
-                            <input type="submit" value="Submit">
-                        </form>
+                        
                     </div>
                     <div class="image-selection">
-                        <form action="/handle_image_selection" method="post">
-                            {% for image in image_files %}
-                                <div class="image-file">
-                                    <input type="radio" id="{{ image.name }}" name="selected_image" value="{{ image.name }}">
-                                    <label for="{{ image.name }}">{{ image.name }}</label>
-                                    <img src="data:image/png;base64,{{ image.data|safe }}" alt="{{ image.name }}">
-                                </div>
-                            {% endfor %}
-                            <input type="submit" value="Submit">
-                        </form>
+                        
                     </div>
                 </div>
                 <div class="video-preview">

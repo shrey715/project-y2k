@@ -3,14 +3,13 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>Admin Dashboard</title>
+        <title>Images/Audio Database</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.7.0/dropzone.css" rel="stylesheet">
-        <link rel="icon" href="{{ url_for('static', filename='images/logo-no-text.png') }}" type="image/x-icon">
-        <link rel="stylesheet" href="{{ url_for('static', filename='styles/commstyle.css') }}">
-        <link rel="stylesheet" href="{{ url_for('static', filename='styles/adminstyle.css') }}">
+        <link rel="icon" href={{url_for('static',filename='images/logo-no-text.png')}} type="image/x-icon">
+        <link rel="stylesheet" href={{url_for('static',filename='styles/commstyle.css')}}>
+        <link rel="stylesheet" href={{url_for('static',filename='styles/dbstyle.css')}}>
     </head>
     <body>
         <nav class="sidebar">
@@ -71,29 +70,34 @@
         </nav>
         <div class="main-content">
             <header>
-                <h1>ADMIN DASHBOARD</h1>
+                <h2>IMAGES AND AUDIOS DATABASE</h2>
             </header>
+            <h3>IMAGES</h3>
             <div class="table-container">
                 <table class="users-table">
                     <thead>
                         <tr>
+                            <th>Image ID</th>
+                            <th>Image</th>
+                            <th>File Name</th>
                             <th>User ID</th>
-                            <th>Username</th>
-                            <th>Email</th>
-                            <th>Number of Images</th>
-                            <th>Number of Audio</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for user in users %}
+                        
+                    </tbody>
+                </table>
+            </div>
+            <h3>AUDIOS</h3>
+            <div class="table-container">
+                <table class="users-table">
+                    <thead>
                         <tr>
-                            <td>{{user.user_id}}</td>
-                            <td>{{user.username}}</td>
-                            <td>{{user.email}}</td>
-                            <td>{{user.image_count}}</td>
-                            <td>{{user.audio_count}}</td>
+                            
                         </tr>
-                        {% endfor %}
+                    </thead>
+                    <tbody>
+                        
                     </tbody>
                 </table>
             </div>
