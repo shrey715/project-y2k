@@ -227,6 +227,7 @@ def user_dashboard(username):
     if session['authenticated'] == False:
         return redirect('/login')
     current_user = get_jwt_identity()
+    print("Current user:", current_user)
     if current_user != username:
         print("Error: Current user does not match requested user.")
         abort(403)
