@@ -21,7 +21,7 @@
                     <i  id="sidebar-btn" class='bx bxs-chevrons-right'></i>
                 </button>
                 <li class="sidebar-nav-item">
-                    <a href={{ url_for('user_dashboard', username=username) }}>
+                    <a href={{ url_for('user_dashboard') }}>
                         <i class='bx bx-home-alt-2' ></i>
                         <span class="nav-text">Home</span>
                     </a>
@@ -49,7 +49,7 @@
                 </li>
                 {% endif %}
                 <li class="sidebar-nav-item">
-                    <a href="{{ url_for('user_details', username=username) }}">
+                    <a href="{{ url_for('user_details') }}">
                         <i class='bx bxs-user-circle'></i>
                         <span class="nav-text">{{username}}</span>
                     </a>
@@ -88,26 +88,52 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.7.0/dropzone.js"></script>
         <script src="{{ url_for('static', filename='scripts/script.js') }}" async defer></script>
         <script>
-            Dropzone.options.imageDropzone = {
+            Dropzone.autoDiscover = false;
+
+            var imageDropzone = new Dropzone("#imageDropzone", {
                 paramName: "image", 
                 maxFilesize: 2, 
                 addRemoveLinks: true,
+                autoProcessQueue: false,
                 dictDefaultMessage: 'Drag an image here to upload, or click to select one'
-            };
+            });
+        
+            imageDropzone.on("addedfile", function(file) {
+                if (!file.type.match(/image.*/)) {
+                    this.removeFile(file);
+                    alert("Error: Files of this type are not accepted");
+                }
+            });
 
-            Dropzone.options.audioDropzone = {
+            var audioDropzone = new Dropzone("#audioDropzone", {
                 paramName: "audio",
                 maxFilesize: 2, 
                 addRemoveLinks: true,
+                autoProcessQueue: false,
                 dictDefaultMessage: 'Drag an audio file here to upload, or click to select one'
-            };
-
+            });
+        
             document.getElementById("submitImage").addEventListener("click", function() {
-                Dropzone.forElement("#imageDropzone").processQueue();
+                imageDropzone.processQueue();
+            });
+
+            audioDropzone.on("addedfile", function(file) {
+                if (!file.type.match(/audio.*/)) {
+                    this.removeFile(file);
+                    alert("Error: Files of this type are not accepted");
+                }
             });
         
             document.getElementById("submitAudio").addEventListener("click", function() {
-                Dropzone.forElement("#audioDropzone").processQueue();
+                audioDropzone.processQueue();
+            });
+        
+            imageDropzone.on("queuecomplete", function() {
+                location.reload();
+            });
+        
+            audioDropzone.on("queuecomplete", function() {
+                location.reload();
             });
         </script>
     </body>

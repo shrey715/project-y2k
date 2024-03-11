@@ -20,7 +20,7 @@
                     <i  id="sidebar-btn" class='bx bxs-chevrons-right'></i>
                 </button>
                 <li class="sidebar-nav-item">
-                    <a href={{ url_for('user_dashboard', username=username) }}>
+                    <a href={{ url_for('user_dashboard') }}>
                         <i class='bx bx-home-alt-2' ></i>
                         <span class="nav-text">Home</span>
                     </a>
@@ -48,7 +48,7 @@
                 </li>
                 {% endif %}
                 <li class="sidebar-nav-item">
-                    <a href="{{ url_for('user_details', username=username) }}">
+                    <a href="{{ url_for('user_details') }}">
                         <i class='bx bxs-user-circle'></i>
                         <span class="nav-text">{{username}}</span>
                     </a>
@@ -65,15 +65,35 @@
             <div class="editor">
                 <div class="audio-image-panel">
                     <div class="audio-selection">
-                        
+                        <form action="/handle_audio_selection" method="post">
+                            {% for audio in audio_files %}
+                                <div class="audio-file">
+                                    <input type="radio" id="{{ audio.name }}" name="selected_audio" value="{{ audio.name }}">
+                                    <label for="{{ audio.name }}">{{ audio.name }}</label>
+                                    <audio controls>
+                                        <source src="data:audio/mpeg;base64,{{ audio.data|safe }}" type="audio/mpeg">
+                                    </audio>
+                                </div>
+                            {% endfor %}
+                            <input type="submit" value="Submit">
+                        </form>
                     </div>
                     <div class="image-selection">
-                        
+                        <form action="/handle_image_selection" method="post">
+                            {% for image in image_files %}
+                                <div class="image-file">
+                                    <input type="radio" id="{{ image.name }}" name="selected_image" value="{{ image.name }}">
+                                    <label for="{{ image.name }}">{{ image.name }}</label>
+                                    <img src="data:image/png;base64,{{ image.data|safe }}" alt="{{ image.name }}">
+                                </div>
+                            {% endfor %}
+                            <input type="submit" value="Submit">
+                        </form>
                     </div>
                 </div>
                 <div class="video-preview">
                     
-                </div>
+                </div> 
                 <div class="edit-panel">
                     <div class="edit-options">
                        
@@ -81,6 +101,7 @@
                 </div>
             </div>
             <div class="timeline">
+                
             </div>
         </div>
         <script src="{{ url_for('static', filename='scripts/script.js') }}" async defer></script>

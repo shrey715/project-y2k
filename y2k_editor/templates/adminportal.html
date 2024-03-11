@@ -21,7 +21,7 @@
                     <i  id="sidebar-btn" class='bx bxs-chevrons-right'></i>
                 </button>
                 <li class="sidebar-nav-item">
-                    <a href={{ url_for('user_dashboard', username=username) }}>
+                    <a href={{ url_for('user_dashboard') }}>
                         <i class='bx bx-home-alt-2' ></i>
                         <span class="nav-text">Home</span>
                     </a>
@@ -49,7 +49,7 @@
                 </li>
                 {% endif %}
                 <li class="sidebar-nav-item">
-                    <a href="{{ url_for('user_details', username=username) }}">
+                    <a href="{{ url_for('user_details') }}">
                         <i class='bx bxs-user-circle'></i>
                         <span class="nav-text">{{username}}</span>
                     </a>
@@ -79,7 +79,7 @@
                     </thead>
                     <tbody>
                         {% for user in users %}
-                        <tr onclick="window.location='{{ url_for('user_details', username=user.username) }}';">
+                        <tr>
                             <td>{{user.user_id}}</td>
                             <td>{{user.username}}</td>
                             <td>{{user.email}}</td>

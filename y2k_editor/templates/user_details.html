@@ -20,7 +20,7 @@
                     <i  id="sidebar-btn" class='bx bxs-chevrons-right'></i>
                 </button>
                 <li class="sidebar-nav-item">
-                    <a href={{ url_for('user_dashboard', username=username) }}>
+                    <a href={{ url_for('user_dashboard') }}>
                         <i class='bx bx-home-alt-2' ></i>
                         <span class="nav-text">Home</span>
                     </a>
@@ -48,7 +48,7 @@
                 </li>
                 {% endif %}
                 <li class="sidebar-nav-item">
-                    <a href="{{ url_for('user_details', username=username) }}">
+                    <a href="{{ url_for('user_details') }}">
                         <i class='bx bxs-user-circle'></i>
                         <span class="nav-text">{{username}}</span>
                     </a>
@@ -97,7 +97,7 @@
                             <i class='bx bx-image' ></i>
                             <span class="action-text">Upload Images/Audio</span>
                         </a>
-                        <a href={{ url_for('user_dashboard', username=user_details.username) }} class="user-profile-action">
+                        <a href={{ url_for('user_dashboard') }} class="user-profile-action">
                             <i class='bx bx-home-alt-2' ></i>
                             <span class="action-text">View Images and Audio</span>
                         </a>

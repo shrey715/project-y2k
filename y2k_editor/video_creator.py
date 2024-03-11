@@ -1,22 +1,31 @@
-# Testing stuff out
-
-from moviepy.editor import AudioFileClip, ImageSequenceClip, ImageClip, concatenate_videoclips, concatenate_audioclips, cvsecs
+from moviepy.editor import ImageClip, concatenate_videoclips
+import pymysql
+import io
+from PIL import Image
 import numpy as np
-import cv2
 
-class Project:
-    def __init__(self):
-        ...
+# Connect to the database
+connection = pymysql.connect(host='localhost',
+                            user='root',
+                            password='Noshu@1211',
+                            db='y2k_database',
+                            cursorclass=pymysql.cursors.DictCursor)
 
-with open(r'y2k_editor/static/images/logo.png', 'rb') as file:
-    image_data = file.read()
-dur = 3
+images = []
+cursor = connection.cursor()
+cursor.execute('SELECT * FROM images')
+for row in cursor:
+    image = Image.open(io.BytesIO(row['image']))
+    width, height = image.size
+    new_height = 720
+    new_width = int(new_height * width / height)
+    image = image.resize((new_width, new_height))
+    images.append(np.array(image))
+cursor.close()
+connection.close()
 
-image_array = np.asarray(bytearray(image_data), dtype="uint8")
-image_array = cv2.imdecode(image_array, cv2.IMREAD_UNCHANGED)
+clips = [ImageClip(m).set_duration(2)
+            for m in images]
 
-imgclip = ImageClip(image_array, duration=cvsecs(dur))
-img2 = imgclip.set_opacity(op=0.5)
-video = concatenate_videoclips((imgclip, img2))
-
-video.write_videofile('stg.mp4', fps=30)
+final_video = concatenate_videoclips(clips, method="compose")
+final_video.write_videofile("my_concatenation.mp4", fps=24)

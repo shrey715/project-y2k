@@ -152,7 +152,6 @@ body{
     width: 96.4%;
     margin-left: auto;
 }
-
 .search-wrapper{
     width: 100%;
     display: flex;
@@ -213,7 +212,6 @@ body{
     color: var(--color-white);
     font-weight: 500;
     text-align: center;
-
 }
 
 .image-gallery-header p{
@@ -248,4 +246,127 @@ body{
     width: 85%;
     height: 2px;
     background-image: linear-gradient(to right, var(--color-cyan), var(--color-pink));
+}
+
+.invisible{
+    display: none;
+}
+
+.search-results-header{
+    color: var(--color-white);
+    font-size: 2rem;
+    font-weight: 600;
+    padding: 1rem 0px;
+}
+
+.search-results-header p{
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.image-checkbox {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.image-checkbox + label {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    height: 25px;
+    width: 25px;
+    background-color: #999;
+    border-radius: 50%;
+}
+
+.image-checkbox:checked + label {
+    background-color: var(--color-orange);
+}
+
+.image-checkbox + label:after {
+    content: "";
+    position: absolute;
+    left: 9px;
+    top: 5px;
+    width: 7px;
+    height: 13px;
+    border: solid white;
+    border-width: 0 3px 3px 0;
+    transform: rotate(45deg);
+    opacity: 0;
+}
+
+.image-checkbox:checked + label:after {
+    opacity: 1;
+}
+
+#video-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    bottom: -4rem; 
+    left: 0;
+    font-size: 1.5rem;
+    width: 50%; 
+    height: 4rem; 
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    text-align: center;
+    line-height: 3rem; 
+    transition: all 0.3s ease-in-out;
+}
+
+#video-bar.visible {
+    bottom: 0;
+}
+
+#video-bar span{
+    cursor: pointer;
+    padding: 1rem 0;
+    transition: all 0.3s ease-in-out;
+}
+
+#video-bar:hover {
+    cursor: pointer;
+    color: var(--color-background);
+    background-color: var(--color-orange);
+}
+
+#delete-images{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    bottom: -4rem; 
+    right: 0;
+    font-size: 1.5rem;
+    width: 50%; 
+    height: 4rem; 
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    text-align: center;
+    line-height: 3rem; 
+    transition: all 0.3s ease-in-out;
+}
+
+#delete-images.visible {
+    bottom: 0;
+}
+
+#delete-images span{
+    cursor: pointer;
+    padding: 1rem 0;
+    transition: all 0.3s ease-in-out;
+}
+
+#delete-images:hover {
+    cursor: pointer;
+    color: var(--color-background);
+    background-color: var(--color-orange);
 }

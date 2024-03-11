@@ -6,7 +6,6 @@
 
 # Ignore Python cache files
 __pycache__/
-y2k_editor/__pycache__/
 *.pyc
 *.pyo
 *.pyd
@@ -22,6 +21,8 @@ build/
 .env/
 
 # Ignore personal testing/credentials directories
-# Do all your code testing inside testing/ directory
-testing/
-y2k_editor/db_credentials.py
+# Do all code testing inside the /testing/ root directory or
+# inside test/ subdirectories inside any directory.
+/testing/
+test/
+/y2k_editor/db_credentials.py

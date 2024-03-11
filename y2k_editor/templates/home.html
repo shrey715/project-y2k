@@ -20,7 +20,7 @@
                     <i  id="sidebar-btn" class='bx bxs-chevrons-right'></i>
                 </button>
                 <li class="sidebar-nav-item">
-                    <a href={{ url_for('user_dashboard', username=username) }}>
+                    <a href={{ url_for('user_dashboard') }}>
                         <i class='bx bx-home-alt-2' ></i>
                         <span class="nav-text">Home</span>
                     </a>
@@ -48,7 +48,7 @@
                 </li>
                 {% endif %}
                 <li class="sidebar-nav-item">
-                    <a href="{{ url_for('user_details', username=username) }}">
+                    <a href="{{ url_for('user_details') }}">
                         <i class='bx bxs-user-circle'></i>
                         <span class="nav-text">{{username}}</span>
                     </a>
@@ -68,28 +68,139 @@
                     <input id="searchbar" type="search" placeholder="Search">
                 </div>
             </header>
-            <div class="image-gallery-header">
-                <p>Default Images</p>
+            <div  id="search-results" class="search-results invisible">
+                <div class="search-results-header">
+                    <p>Search Results</p>
+                </div>
+                <div class="image_gallery">
+                </div>
             </div>
-            <div class="image_gallery">
-                {% for image in default_images %}
-                    <div class="image-container">
-                        <img src="{{ url_for('get_image',image_id=image['image_id']) }}" alt="image">
-                    </div>
-                {% endfor %}
-            </div>
-            <hr>
-            <div class="image-gallery-header">
-                <p>Your Images</p>
-            </div>
-            <div class="image_gallery">
-                {% for image in images %}
-                    <div class="image-container">
-                        <img src="{{ url_for('get_image',image_id=image['image_id']) }}" alt="image">
-                    </div>
-                {% endfor %} 
+            <div class="non-search-results">
+                <div class="image-gallery-header">
+                    <p>Default Images</p>
+                </div>
+                <div class="image_gallery">
+                    {% for image in default_images %}
+                        <div class="image-container" id="image-{{ image['image_id'] }}">
+                            <img src="{{ url_for('get_image',image_id=image['image_id']) }}" alt="image" data-filename="{{ image['filename'] }}">
+                            <input type="checkbox" id="checkbox-{{ image['image_id'] }}" class="image-checkbox" data-image-id="{{ image['image_id'] }}">
+                            <label for="checkbox-{{ image['image_id'] }}"></label>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="image-gallery-header">
+                    <p>Your Images</p>
+                </div>
+                <div class="image_gallery">
+                    {% for image in images %}
+                        <div class="image-container" id="image-{{ image['image_id'] }}">
+                            <img src="{{ url_for('get_image',image_id=image['image_id']) }}" alt="image" data-filename="{{ image['filename'] }}">
+                            <input type="checkbox" id="checkbox-{{ image['image_id'] }}" class="image-checkbox" data-image-id="{{ image['image_id'] }}">
+                            <label for="checkbox-{{ image['image_id'] }}"></label>   
+                        </div>
+                    {% endfor %}
+                </div>
+                <div id="video-bar" onclick="createVideo()">
+                    <span>Create Video</span>
+                </div>
+                <div id="delete-images" onclick="deleteImages()">
+                    <span>Delete Images</span>
+                </div>
             </div>
         </div>
         <script src="{{ url_for('static', filename='scripts/script.js') }}" async defer></script>
+        <script>
+            var searchbar = document.getElementById('searchbar');
+            var galleries = document.getElementsByClassName('image_gallery');
+            var searchResults = document.getElementById('search-results');
+            var nonSearchResults = document.querySelector('.non-search-results');
+        
+            function searchImage() {
+                var searchText = searchbar.value.toLowerCase();
+        
+                searchResults.innerHTML = '';
+                var resultsGallery = document.createElement('div');
+                resultsGallery.className = 'image_gallery';
+        
+                for (var i = 0; i < galleries.length; i++) {
+                    var images = galleries[i].getElementsByTagName('img');
+                    for (var j = 0; j < images.length; j++) {
+                        var filename = images[j].getAttribute('data-filename').toLowerCase();
+        
+                        if (filename.includes(searchText)) {
+                            resultsGallery.appendChild(images[j].parentElement.cloneNode(true));
+                        }
+                    }
+                }
+        
+                searchResults.appendChild(resultsGallery);
+        
+                if (searchText) {
+                    nonSearchResults.style.display = 'none';
+                    searchResults.style.display = 'block';
+                } else {
+                    nonSearchResults.style.display = 'block';
+                    searchResults.style.display = 'none';
+                }
+            }
+        
+            searchbar.addEventListener('focus', function() {
+                nonSearchResults.style.display = 'none';
+                searchResults.style.display = 'block';
+            });
+        
+            searchbar.addEventListener('blur', function() {
+                if (!searchbar.value) {
+                    nonSearchResults.style.display = 'block';
+                    searchResults.style.display = 'none';
+                }
+            });
+
+            var checkboxes = document.getElementsByClassName('image-checkbox');
+            var videoBar = document.getElementById('video-bar');
+            var deleteBar = document.getElementById('delete-images');
+
+            for (var i = 0; i < checkboxes.length; i++) {
+                checkboxes[i].addEventListener('change', function() {
+                    for (var j = 0; j < checkboxes.length; j++) {
+                        if (checkboxes[j].checked) {
+                            videoBar.classList.add('visible');
+                            deleteBar.classList.add('visible');
+                            return;
+                        }
+                    }
+                    videoBar.classList.remove('visible');
+                    deleteBar.classList.remove('visible');
+                });
+            }
+
+            function deleteImages() {
+                var imageIds = [];
+                for (var i = 0; i < checkboxes.length; i++) {
+                    if (checkboxes[i].checked) {
+                        imageIds.push(checkboxes[i].getAttribute('data-image-id'));
+                    }
+                }
+                fetch('/delete_images?image_ids=' + imageIds.join(','), {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    console.log(data);
+                    if (data.success) {
+                        console.log("Reloading page")
+                        location.reload();
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+            }
+        </script>
     </body>
 </html>

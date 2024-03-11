@@ -1,4 +1,4 @@
-from y2k_editor import db
+from y2k_editor_aditya import db
 from sqlalchemy.dialects.mysql import LONGBLOB
 
 class User(db.Model):
@@ -16,7 +16,7 @@ class Image(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     filename = db.Column(db.String(255))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    image = db.Column(db.LargeBinary().with_variant(LONGBLOB, 'mysql'), nullable=False)
+    image = db.Column(db.LargeBinary().with_variant(LONGBLOB, 'mysql'), nullable=False) # Change to filepaths?
     file_metadata = db.Column('metadata', db.JSON)
     used_in_projects = db.Column(db.Integer, default=0)
     
@@ -28,7 +28,7 @@ class Audio(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     filename = db.Column(db.String(255))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    audio = db.Column(db.LargeBinary().with_variant(LONGBLOB, 'mysql'), nullable=False)
+    audio = db.Column(db.LargeBinary().with_variant(LONGBLOB, 'mysql'), nullable=False) # Change to filepaths?
     file_metadata = db.Column('metadata', db.JSON)
     used_in_projects = db.Column(db.Integer, default=0)
 
@@ -40,7 +40,7 @@ class DBProject(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String(255), unique=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    project_data = db.Column(db.LargeBinary().with_variant(LONGBLOB, 'mysql'), nullable=False)
+    project_data = db.Column(db.LargeBinary().with_variant(LONGBLOB, 'mysql'), nullable=False)  # Change to JSON?
     
     def __repr__(self):
         return f"DBProject('{self.title}', user_id={self.user_id})"
