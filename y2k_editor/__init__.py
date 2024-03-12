@@ -1,16 +1,23 @@
-from flask import g, Flask, render_template, request, redirect, url_for, make_response, abort, jsonify
+from flask import Flask, render_template, request, redirect, url_for, make_response, abort, jsonify
 from flask_jwt_extended import JWTManager, create_access_token, decode_token, jwt_required, get_jwt_identity
+from flask_sqlalchemy import SQLAlchemy
 from datetime import timedelta
 from flask_cors import CORS
 from flask_wtf.csrf import CSRFProtect
 from werkzeug.utils import secure_filename
-from urllib.parse import quote_plus as _parse_quote_plus
-import pymysql  
+#from urllib.parse import quote_plus as _parse_quote_plus
+#import pymysql  
 import hashlib
 import os
 import glob
 import json
-import y2k_editor.db_credentials as _dbcred
+from dotenv import load_dotenv
+import sqlalchemy_cockroachdb 
+
+print("CockroachDB:", sqlalchemy_cockroachdb.__version__)
+print("Imported modules")
+
+load_dotenv()
 
 app=Flask(__name__)
 app.config["JWT_TOKEN_LOCATION"] = ["headers", "cookies", "json", "query_string"]
@@ -25,131 +32,75 @@ app.config['SESSION_COOKIE_SECURE'] = True
 jwt = JWTManager(app)
 csrf = CSRFProtect(app)
 CORS(app)
-# -----
-"""
-The `db_credentials.py` module contains the credentials for the MySQL server
-running on the system. Each dev machine needs to have its own module with its
-respective MySQL credentials set up in the file.
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
+db = SQLAlchemy(app)
 
-To do this, create the file `db_credentials.py` (in the same directory as this module).
-Check the sample file `db_credentials.sample.py` for the expected format of the file.
+print("Database URI:", app.config['SQLALCHEMY_DATABASE_URI'])
+print("Database:", db)
+print("App:", app)
+print("Connected to database")
 
-Note: IRead the note in `db_credentials.sample.py`
-"""
-# Uncomment the 5 lines below to enable SQLAlchemy implementation (changes nothing for now)
+from y2k_editor.models import User, Audio, Image, DBProject
+with app.app_context():
+    db.create_all()
+    
+print("Created tables")
 
-#app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{_dbcred.username}:{_parse_quote_plus(_dbcred.password)}@localhost/{_dbcred.db_name}'
-# db = SQLAlchemy(app)
-
-# from y2k_editor.models import User, Audio, Image, DBProject
-# with app.app_context():
-    # db.create_all()
-
-# -----
-
-def initPreloadedLibrary(connection):
+def initPreloadedLibrary():
     directory = 'static/audio/preloaded'
     audio_files = glob.glob(os.path.join(directory, '*.mp3'))
 
     try:
-        with connection.cursor() as cursor:
-            for audio_file in audio_files:
-                filename = os.path.basename(audio_file)
+        for audio_file in audio_files:
+            filename = os.path.basename(audio_file)
 
-                with open(audio_file, 'rb') as f:
-                    audio_data = f.read()
+            with open(audio_file, 'rb') as f:
+                audio_data = f.read()
 
-                metadata = {}
-                metadata_json = json.dumps(metadata)
-
-                sql = "INSERT INTO `audios` (`filename`, `user_id`, `audio`, `metadata`) VALUES (%s, 1, %s, %s)"
-                cursor.execute(sql, (filename, audio_data, metadata_json))
-        connection.commit()
-    except pymysql.MySQLError as e:
-        print(f"Error: {e}")    
-
-def db_init():
-    try: 
-        connection = pymysql.connect(host=_dbcred.host,
-                                     user=_dbcred.username,
-                                     password=_dbcred.password,
-                                     db='y2k_database',
-                                     charset='utf8mb4',
-                                     cursorclass=pymysql.cursors.DictCursor)
+            metadata = {
+                "filename": filename,
+                "user_id": 1,
+                "file_type": "audio",
+            }
+            metadata_json = json.dumps(metadata)
+            db.session.add(Audio(filename=filename, user_id=1, audio=audio_data, metadata=metadata_json))
+        db.session.commit()
     except Exception as e:
-        connection = pymysql.connect(host=_dbcred.host,
-                                     user=_dbcred.username,
-                                     password=_dbcred.password,
-                                     charset='utf8mb4',
-                                     cursorclass=pymysql.cursors.DictCursor)
-        with connection.cursor() as cursor:
-            cursor.execute('CREATE DATABASE y2k_database')
-            cursor.execute('USE y2k_database')
-            cursor.execute('CREATE TABLE users (user_id INT PRIMARY KEY AUTO_INCREMENT, username VARCHAR(100) UNIQUE, email VARCHAR(100) UNIQUE, password VARCHAR(64));')
-            cursor.execute('CREATE TABLE images (image_id INT PRIMARY KEY AUTO_INCREMENT, filename VARCHAR(255) UNIQUE, user_id INT, image LONGBLOB, metadata JSON, FOREIGN KEY (user_id) REFERENCES users(user_id));')
-            cursor.execute('CREATE TABLE audios (audio_id INT PRIMARY KEY AUTO_INCREMENT, filename VARCHAR(255) UNIQUE, user_id INT, audio LONGBLOB, metadata JSON, FOREIGN KEY (user_id) REFERENCES users(user_id));')
-            
-            username = 'admin'
-            email = 'admin@y2k.com'
-            hashed_password = hashlib.sha256('admin'.encode()).hexdigest()
-            cursor.execute('INSERT INTO users (username, email, password) VALUES (%s, %s, %s)', (username, email, hashed_password))
-            initPreloadedLibrary(connection)
-            connection.commit()
-    connection.close()
+        print(f"Error: {e}")
     
 def getImages(username):
-    with g.db.cursor() as cursor:
-        sql_get_user_id = "SELECT user_id FROM users WHERE username = %s"
-        cursor.execute(sql_get_user_id, (username,))
-        user_id = cursor.fetchone()['user_id']
-
-        sql_images = "SELECT * FROM images WHERE user_id = %s"
-        cursor.execute(sql_images, (user_id,))
-        images = cursor.fetchall()
-        return images
+    user = User.query.filter_by(username=username).first()
+    if user:
+        return Image.query.filter_by(user_id=user.id).all()
+    return []
         
 def getAudios(username):
-    with g.db.cursor() as cursor:
-        sql_get_user_id = "SELECT user_id FROM users WHERE username = %s"
-        cursor.execute(sql_get_user_id, (username,))
-        user_id = cursor.fetchone()['user_id']
+    user = User.query.filter_by(username=username).first()
+    if user:
+        return Audio.query.filter_by(user_id=user.id).all()
+    return []
 
-        sql_audios = "SELECT * FROM audios WHERE user_id = %s"
-        cursor.execute(sql_audios, (user_id,))
-        audios = cursor.fetchall()
-        return audios
-    
-@app.before_request
-def before_request():
-    g.db = pymysql.connect(host='localhost',
-                           user='root',
-                           password='Noshu@1211',
-                           db='y2k_database',
-                           charset='utf8mb4',
-                           cursorclass=pymysql.cursors.DictCursor)
-
+def checkUserExists(*, user_id: int = None, username: str = None, email: str = None):
+    try:
+        if user_id is not None:
+            return User.query.filter_by(id=user_id).first()
+        elif username is not None:
+            return User.query.filter_by(username=username).first()
+        elif email is not None:
+            return User.query.filter_by(email=email).first()
+        else:
+            raise TypeError("Atleast one of user_id, username, or email should be provided.")
+    except Exception as e:
+        print(f"Error: {e}")
+        
 @app.teardown_request
 def teardown_request(exception):
-    db = getattr(g, 'db', None)
-    if db is not None:
-        db.close()
-
-def checkUserExists(connection, /, *,  user_id: int = None, username: str = None, email: str = None):
-    cmd = "SELECT * FROM users WHERE {} = {}"
-    if user_id is not None:
-        cmd = cmd.format("user_id", user_id)
-    elif username is not None:
-        cmd = cmd.format("username", f"'{username}'")
-    elif email is not None:
-        cmd = cmd.format("email", f"'{email}'")
+    if exception:
+        db.session.rollback()
     else:
-        raise TypeError("Atleast one of user_id, username, or email should be provided.")
-
-    with connection.cursor() as cursor:
-        cursor.execute(cmd)
-        result = cursor.fetchone()
-        return result is not None
-        
+        db.session.commit()
+    db.session.remove()    
+    
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -160,7 +111,7 @@ def login():
     cookie = request.cookies.get('access_token_cookie')
     print("Cookie:", cookie)
     if cookie:
-        current_user = cookie['sub']
+        current_user = decode_token(cookie)['sub']
         if checkUserExists(g.db, username=current_user):
             return redirect(url_for('user_dashboard', username=current_user))
         else:
@@ -173,24 +124,20 @@ def login():
 
             if not username or not password:
                 return jsonify({'status': 'error', 'message': 'Please fill in all fields'})
-
-            with g.db.cursor() as cursor:
-                sql_check_user = "SELECT * FROM users WHERE username = %s"
-                cursor.execute(sql_check_user, (username,))
-                result = cursor.fetchone()
-
-                if not result:
-                    return jsonify({'status': 'error', 'message': 'User does not exist'})
-
-                hashed_password = hashlib.sha256(password.encode()).hexdigest()                
-                if result['password'] == hashed_password:
-                    expireTime = 86400
-                    access_token = create_access_token(identity=username, expires_delta=timedelta(seconds=expireTime))
-                    response = make_response(jsonify({'status': 'success', 'message': 'Login successful'}))
-                    response.set_cookie('access_token_cookie', value=access_token, max_age=expireTime, httponly=True, path='/')
-                    return response
-                else:
-                    return jsonify({'status': 'error', 'message': 'Invalid password'})
+            
+            user = checkUserExists(username=username)
+            if not user:
+                return jsonify({'status': 'error', 'message': 'User does not exist'})
+            hashed_password = hashlib.sha256(password.encode()).hexdigest()          
+                  
+            if user.password == hashed_password:
+                expireTime = 86400
+                access_token = create_access_token(identity=username, expires_delta=timedelta(seconds=expireTime))
+                response = make_response(jsonify({'status': 'success', 'message': 'Login successful'}))
+                response.set_cookie('access_token_cookie', value=access_token, max_age=expireTime, httponly=True, path='/')
+                return response
+            else:
+                return jsonify({'status': 'error', 'message': 'Invalid password'})
         except Exception as e:
             print("Error:", e)
             return jsonify({'status': 'error', 'message': 'Failed to login'})
@@ -217,23 +164,19 @@ def signup():
             if not username or not password or not email:
                 return jsonify({'status': 'error', 'message': 'Please fill in all fields'})
 
-            with g.db.cursor() as cursor:
-                sql_check_user = "SELECT * FROM users WHERE username = %s"
-                cursor.execute(sql_check_user, (username,))
-                result = cursor.fetchone()
+            user = checkUserExists(username=username)
 
-                if result:
-                    return jsonify({'status': 'error', 'message': 'User already exists'})
+            if user:
+                return jsonify({'status': 'error', 'message': 'User already exists'})
 
-                hashed_password = hashlib.sha256(password.encode()).hexdigest()
-                sql_insert_user = "INSERT INTO users (username, email, password) VALUES (%s, %s, %s)"
-                cursor.execute(sql_insert_user, (username, email, hashed_password))
-                g.db.commit()
+            hashed_password = hashlib.sha256(password.encode()).hexdigest()
+            new_user = User(username=username, email=email, password=hashed_password)
+            db.session.add(new_user)
 
-                access_token = create_access_token(identity=username, expires_delta=timedelta(days=7))
-                response = make_response(jsonify({'status': 'success', 'message': 'Signup successful'}))
-                response.set_cookie('access_token_cookie', value=access_token, max_age=86400, httponly=True, path='/')
-                return response
+            access_token = create_access_token(identity=username, expires_delta=timedelta(days=7))
+            response = make_response(jsonify({'status': 'success', 'message': 'Signup successful'}))
+            response.set_cookie('access_token_cookie', value=access_token, max_age=86400, httponly=True, path='/')
+            return response
         except Exception as e:
             print("Error:", e)
             return jsonify({'status': 'error', 'message': 'Failed to signup'})
@@ -257,10 +200,11 @@ def admin_dashboard():
         abort(403)
     users_list = []
     
-    with g.db.cursor() as cursor:
-        sql_get_users = "SELECT users.user_id, username, email, (SELECT COUNT(*) FROM images WHERE users.user_id = images.user_id) as image_count, (SELECT COUNT(*) FROM audios WHERE users.user_id = audios.user_id) as audio_count FROM users;"
-        cursor.execute(sql_get_users)
-        users_list = cursor.fetchall()
+    sql_get_users = "SELECT users.user_id, username, email, (SELECT COUNT(*) FROM images WHERE users.user_id = images.user_id) as image_count, (SELECT COUNT(*) FROM audios WHERE users.user_id = audios.user_id) as audio_count FROM users;"
+
+    users_list = db.session.execute()
+    
+
     return render_template('adminportal.html', username='admin', users=users_list)
 
 @app.route('/user_dashboard', methods=['GET'])
