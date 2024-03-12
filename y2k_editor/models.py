@@ -1,4 +1,4 @@
-from y2k_editor_aditya import db
+from y2k_editor import db
 from sqlalchemy.dialects.mysql import LONGBLOB
 
 class User(db.Model):
