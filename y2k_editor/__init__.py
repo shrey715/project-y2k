@@ -1,14 +1,16 @@
-from flask import g, Flask, render_template, request, redirect, url_for, make_response, abort, session, jsonify
-from flask_jwt_extended import JWTManager, unset_jwt_cookies, create_access_token, jwt_required, get_jwt_identity, decode_token
+from flask import g, Flask, render_template, request, redirect, url_for, make_response, abort, jsonify
+from flask_jwt_extended import JWTManager, create_access_token, decode_token, jwt_required, get_jwt_identity
 from datetime import timedelta
 from flask_cors import CORS
 from flask_wtf.csrf import CSRFProtect
 from werkzeug.utils import secure_filename
+from urllib.parse import quote_plus as _parse_quote_plus
 import pymysql  
 import hashlib
 import os
 import glob
 import json
+import y2k_editor.db_credentials as _dbcred
 
 app=Flask(__name__)
 app.config["JWT_TOKEN_LOCATION"] = ["headers", "cookies", "json", "query_string"]
@@ -20,12 +22,32 @@ app.config['JWT_COOKIE_CSRF_PROTECT'] = False
 app.config['SESSION_COOKIE_DOMAIN'] = None
 app.config['SESSION_COOKIE_SAMESITE'] = 'None'
 app.config['SESSION_COOKIE_SECURE'] = True
-session={'authenticated': False,'username': ''}
 jwt = JWTManager(app)
 csrf = CSRFProtect(app)
 CORS(app)
+# -----
+"""
+The `db_credentials.py` module contains the credentials for the MySQL server
+running on the system. Each dev machine needs to have its own module with its
+respective MySQL credentials set up in the file.
 
-def extractAudioFiles(connection):
+To do this, create the file `db_credentials.py` (in the same directory as this module).
+Check the sample file `db_credentials.sample.py` for the expected format of the file.
+
+Note: IRead the note in `db_credentials.sample.py`
+"""
+# Uncomment the 5 lines below to enable SQLAlchemy implementation (changes nothing for now)
+
+#app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{_dbcred.username}:{_parse_quote_plus(_dbcred.password)}@localhost/{_dbcred.db_name}'
+# db = SQLAlchemy(app)
+
+# from y2k_editor.models import User, Audio, Image, DBProject
+# with app.app_context():
+    # db.create_all()
+
+# -----
+
+def initPreloadedLibrary(connection):
     directory = 'static/audio/preloaded'
     audio_files = glob.glob(os.path.join(directory, '*.mp3'))
 
@@ -48,18 +70,18 @@ def extractAudioFiles(connection):
 
 def db_init():
     try: 
-        connection = pymysql.connect(host='localhost',
-                                            user='root',
-                                            password='Noshu@1211',
-                                            db='y2k_database',
-                                            charset='utf8mb4',
-                                            cursorclass=pymysql.cursors.DictCursor)
+        connection = pymysql.connect(host=_dbcred.host,
+                                     user=_dbcred.username,
+                                     password=_dbcred.password,
+                                     db='y2k_database',
+                                     charset='utf8mb4',
+                                     cursorclass=pymysql.cursors.DictCursor)
     except Exception as e:
-        connection = pymysql.connect(host='localhost',
-                                            user='root',
-                                            password='Noshu@1211',
-                                            charset='utf8mb4',
-                                            cursorclass=pymysql.cursors.DictCursor)
+        connection = pymysql.connect(host=_dbcred.host,
+                                     user=_dbcred.username,
+                                     password=_dbcred.password,
+                                     charset='utf8mb4',
+                                     cursorclass=pymysql.cursors.DictCursor)
         with connection.cursor() as cursor:
             cursor.execute('CREATE DATABASE y2k_database')
             cursor.execute('USE y2k_database')
@@ -71,8 +93,7 @@ def db_init():
             email = 'admin@y2k.com'
             hashed_password = hashlib.sha256('admin'.encode()).hexdigest()
             cursor.execute('INSERT INTO users (username, email, password) VALUES (%s, %s, %s)', (username, email, hashed_password))
-            
-            audio_files = extractAudioFiles(connection)
+            initPreloadedLibrary(connection)
             connection.commit()
     connection.close()
     
@@ -113,6 +134,22 @@ def teardown_request(exception):
     if db is not None:
         db.close()
 
+def checkUserExists(connection, /, *,  user_id: int = None, username: str = None, email: str = None):
+    cmd = "SELECT * FROM users WHERE {} = {}"
+    if user_id is not None:
+        cmd = cmd.format("user_id", user_id)
+    elif username is not None:
+        cmd = cmd.format("username", f"'{username}'")
+    elif email is not None:
+        cmd = cmd.format("email", f"'{email}'")
+    else:
+        raise TypeError("Atleast one of user_id, username, or email should be provided.")
+
+    with connection.cursor() as cursor:
+        cursor.execute(cmd)
+        result = cursor.fetchone()
+        return result is not None
+        
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -120,8 +157,14 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 @csrf.exempt
 def login():
-    if session['authenticated']:
-        return redirect(f'/user_dashboard/{session["username"]}')
+    cookie = request.cookies.get('access_token_cookie')
+    print("Cookie:", cookie)
+    if cookie:
+        current_user = cookie['sub']
+        if checkUserExists(g.db, username=current_user):
+            return redirect(url_for('user_dashboard', username=current_user))
+        else:
+            return redirect('/logout')
     if request.method == 'POST':
         try:
             data = request.form
@@ -141,12 +184,10 @@ def login():
 
                 hashed_password = hashlib.sha256(password.encode()).hexdigest()                
                 if result['password'] == hashed_password:
-                    access_token = create_access_token(identity=username, expires_delta=timedelta(days=7))
+                    expireTime = 86400
+                    access_token = create_access_token(identity=username, expires_delta=timedelta(seconds=expireTime))
                     response = make_response(jsonify({'status': 'success', 'message': 'Login successful'}))
-                    response.set_cookie('access_token_cookie', value=access_token, max_age=86400, httponly=True, path='/')
-                    session['authenticated'] = True
-                    session['username'] = username
-                    
+                    response.set_cookie('access_token_cookie', value=access_token, max_age=expireTime, httponly=True, path='/')
                     return response
                 else:
                     return jsonify({'status': 'error', 'message': 'Invalid password'})
@@ -155,20 +196,17 @@ def login():
             return jsonify({'status': 'error', 'message': 'Failed to login'})
     return render_template('login.html')
 
-@app.route('/logout', methods=['GET'])
-@csrf.exempt
-def logout():
-    resp = make_response(redirect('/login'))
-    resp.delete_cookie('access_token_cookie', path='/')
-    session['authenticated'] = False
-    session.pop('username', None)
-    return resp
-
 @app.route('/signup', methods=['GET', 'POST'])
 @csrf.exempt
 def signup():
-    if session.get('authenticated', False):
-        return redirect(f'/user_dashboard/{session["username"]}')
+    cookie = request.cookies.get('access_token_cookie')
+    if cookie:
+        current_user = get_jwt_identity()
+        
+        if checkUserExists(g.db, username=current_user):
+            return redirect(f'/user_dashboard')
+        else:
+            return redirect('/logout')
     if request.method == 'POST':
         try:
             data = request.form
@@ -194,21 +232,25 @@ def signup():
 
                 access_token = create_access_token(identity=username, expires_delta=timedelta(days=7))
                 response = make_response(jsonify({'status': 'success', 'message': 'Signup successful'}))
-                response.set_cookie('access_token_cookie', value=access_token, max_age=3600, httponly=True, path='/')
-                session['authenticated'] = True
-                session['username'] = username
-                
+                response.set_cookie('access_token_cookie', value=access_token, max_age=86400, httponly=True, path='/')
                 return response
         except Exception as e:
             print("Error:", e)
             return jsonify({'status': 'error', 'message': 'Failed to signup'})
     return render_template('signup.html')
 
+@app.route('/logout', methods=['GET'])
+@csrf.exempt
+def logout():
+    resp = make_response(redirect('/login'))
+    cookie = request.cookies.get('access_token_cookie')
+    if cookie:
+        resp.delete_cookie('access_token_cookie', path='/')
+    return resp
+
 @app.route('/admin_dashboard/admin', methods=['GET'])
 @jwt_required()
 def admin_dashboard():
-    if session['authenticated'] == False:
-        return redirect('/login')
     current_user = get_jwt_identity()
     if current_user != 'admin':
         print("Error: Current user does not match requested user.")
@@ -221,16 +263,12 @@ def admin_dashboard():
         users_list = cursor.fetchall()
     return render_template('adminportal.html', username='admin', users=users_list)
 
-@app.route('/user_dashboard/<username>', methods=['GET'])
+@app.route('/user_dashboard', methods=['GET'])
 @jwt_required()
-def user_dashboard(username):
-    if session['authenticated'] == False:
+def user_dashboard():
+    username = get_jwt_identity()
+    if username is None:
         return redirect('/login')
-    current_user = get_jwt_identity()
-    print("Current user:", current_user)
-    if current_user != username:
-        print("Error: Current user does not match requested user.")
-        abort(403)
     images = []
     with g.db.cursor() as cursor:
         sql_get_user_id = "SELECT user_id FROM users WHERE username = %s"
@@ -245,7 +283,8 @@ def user_dashboard(username):
 @jwt_required()
 @csrf.exempt
 def get_image(image_id):
-    if session['authenticated'] == False:
+    cookie = request.cookies.get('access_token_cookie')
+    if not cookie:
         return redirect('/login')
     try:
         with g.db.cursor() as cursor:
@@ -268,8 +307,10 @@ def get_image(image_id):
 @jwt_required()
 @csrf.exempt
 def delete_images():
-    if session['authenticated'] == False:
+    cookie = request.cookies.get('access_token_cookie')
+    if not cookie:
         return redirect('/login')
+    current_user = get_jwt_identity()
     try:
         data = request.args.get('image_ids')
         if not data:
@@ -277,8 +318,16 @@ def delete_images():
         image_ids = [int(x) for x in data.split(',')]
         
         with g.db.cursor() as cursor:
-            sql_delete_images = "DELETE FROM images WHERE image_id IN %s"
-            cursor.execute(sql_delete_images, (image_ids,))
+            sql_admin_images = "SELECT image_id FROM images WHERE user_id = 1"
+            cursor.execute(sql_admin_images)
+            admin_images = cursor.fetchall()
+            
+            if current_user != 'admin' and all([image_id in [x['image_id'] for x in admin_images] for image_id in image_ids]):
+                return jsonify(success=False, message="Cannot delete default images")
+            
+            sql_delete_images = "DELETE FROM images WHERE image_id IN %s AND user_id = (SELECT user_id FROM users WHERE username = %s)"
+            params = (tuple(image_ids), current_user)
+            cursor.execute(sql_delete_images, params)
             g.db.commit()
             return jsonify(success=True, message="Images deleted successfully")
     except Exception as e:
@@ -289,20 +338,24 @@ def delete_images():
 @jwt_required()
 @csrf.exempt
 def video_editor():
-    if session['authenticated'] == False:
+    cookie = request.cookies.get('access_token_cookie')
+    if not cookie:
         return redirect('/login')
-    image_files = getImages(session['username'])
-    audio_files = getAudios(session['username'])
-    return render_template('create_video.html',username=session['username'], image_files=image_files, audio_files=audio_files)
+    current_user = get_jwt_identity()
+    image_files = getImages(current_user)
+    audio_files = getAudios(current_user)
+    return render_template('create_video.html',username=current_user, image_files=image_files, audio_files=audio_files)
 
 @app.route('/upload', methods=['GET','POST'])
 @jwt_required()
 @csrf.exempt
 def upload():
-    if session['authenticated'] == False:
+    cookie = request.cookies.get('access_token_cookie')
+    if not cookie:
         return redirect('/login')
+    current_user = get_jwt_identity()
     if request.method == 'GET':
-        return render_template('upload.html', username=session['username'])
+        return render_template('upload.html', username=current_user)
     if request.method == 'POST':
         try:
             file_type = request.form.get('file_type')
@@ -315,12 +368,11 @@ def upload():
             if not files:
                 return jsonify(success=False, message="No files uploaded")
 
-            username = session.get('username')
             user_id = None
             
             with g.db.cursor() as cursor:
                 sql_get_user_id = "SELECT user_id FROM users WHERE username = %s"
-                cursor.execute(sql_get_user_id, (username,))
+                cursor.execute(sql_get_user_id, (current_user,))
                 user_id = cursor.fetchone()['user_id']
 
             for file in files:
@@ -351,15 +403,13 @@ def upload():
             print("Error:", e)
             return jsonify(success=False, message="Failed to upload") 
 
-@app.route('/user_details/<username>', methods=['GET'])
+@app.route('/user_details', methods=['GET'])
 @jwt_required()
-def user_details(username):
-    if session['authenticated'] == False:
+def user_details():
+    cookie = request.cookies.get('access_token_cookie')
+    if not cookie:
         return redirect('/login')
-    current_user = get_jwt_identity()
-    if current_user != username:
-        print("Error: Current user does not match requested user.")
-        abort(403)
+    username = get_jwt_identity()
     user_details = {}
     with g.db.cursor() as cursor:
         sql_get_user_id = "SELECT user_id, username, email FROM users WHERE username = %s"
@@ -374,11 +424,14 @@ def user_details(username):
         audios = cursor.fetchall()
         user_details['images_cnt'] = images[0]['count(*)']
         user_details['audios_cnt'] = audios[0]['count(*)']
-    return render_template('user_details.html', username=current_user, user_details=user_details)
+    return render_template('user_details.html', username=username, user_details=user_details)
 
 @app.route('/images-audio-database', methods=['GET'])
 @jwt_required()
 def images_audio_database():
+    cookie = request.cookies.get('access_token_cookie')
+    if not cookie:
+        return redirect('/login')
     current_user = get_jwt_identity()
     if current_user != 'admin':
         print("Error: Current user does not match requested user.")
@@ -393,7 +446,3 @@ def images_audio_database():
         cursor.execute(sql_audios)
         audios = cursor.fetchall()
     return render_template('images_audio_database.html', username='admin', images=images, audios=audios)
-
-if __name__ == '__main__':
-    db_init()
-    app.run(debug=True)

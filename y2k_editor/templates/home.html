@@ -119,15 +119,22 @@
         </div>
         <script src="{{ url_for('static', filename='scripts/script.js') }}" async defer></script>
         <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var checkboxes = document.getElementsByClassName('image-checkbox');
+                for (var i = 0; i < checkboxes.length; i++) {
+                    checkboxes[i].checked = false;
+                }
+            });
+
             var searchbar = document.getElementById('searchbar');
             var galleries = document.getElementsByClassName('image_gallery');
             var searchResults = document.getElementById('search-results');
             var nonSearchResults = document.querySelector('.non-search-results');
-        
+
             function searchImage() {
                 var searchText = searchbar.value.toLowerCase();
         
-                searchResults.innerHTML = '';
+                searchResults.innerHTML = '<div class="search-results-header"><p>Search Results</p></div>';
                 var resultsGallery = document.createElement('div');
                 resultsGallery.className = 'image_gallery';
         
@@ -200,11 +207,8 @@
                 .then(response => response.json())
                 .then(data => {
                     alert(data.message);
-                    console.log(data);
-                    if (data.success) {
-                        console.log("Reloading page")
-                        location.reload();
-                    }
+                    console.log("Reloading page")
+                    location.reload();
                 })
                 .catch((error) => {
                     console.error('Error:', error);

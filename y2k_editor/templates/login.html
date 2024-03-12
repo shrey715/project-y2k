@@ -163,7 +163,7 @@
                     }else{
                         if(response.status == 'success'){
                             alert(response.message);
-                            window.location.href = '/user_dashboard/'+$('#username').val();
+                            window.location.href = '/user_dashboard';
                         } else if(response.status == 'error'){
                             alert(response.message);
                             window.location.href = '/login';
