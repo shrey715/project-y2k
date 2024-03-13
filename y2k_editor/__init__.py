@@ -12,6 +12,7 @@ import os
 import glob
 import json
 from dotenv import load_dotenv
+from sqlalchemy import select, func, and_
 import sqlalchemy_cockroachdb 
 
 print("CockroachDB:", sqlalchemy_cockroachdb.__version__)
@@ -197,13 +198,29 @@ def admin_dashboard():
     current_user = get_jwt_identity()
     if current_user != 'admin':
         print("Error: Current user does not match requested user.")
+        redirect('/logout')
         abort(403)
-    users_list = []
-    
-    sql_get_users = "SELECT users.user_id, username, email, (SELECT COUNT(*) FROM images WHERE users.user_id = images.user_id) as image_count, (SELECT COUNT(*) FROM audios WHERE users.user_id = audios.user_id) as audio_count FROM users;"
+    image_count_subquery = db.session.query(func.count(Image.user_id)).filter(User.id == Image.user_id).label('image_count')
+    audio_count_subquery = db.session.query(func.count(Audio.user_id)).filter(User.id == Audio.user_id).label('audio_count')
 
-    users_list = db.session.execute()
-    
+    users = db.session.query(
+        User.id,
+        User.username,
+        User.email,
+        image_count_subquery,
+        audio_count_subquery
+    ).all()
+
+    users_list = [
+        {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'images_cnt': user.image_count,
+            'audios_cnt': user.audio_count
+        }
+        for user in users
+    ]
 
     return render_template('adminportal.html', username='admin', users=users_list)
 
@@ -214,13 +231,13 @@ def user_dashboard():
     if username is None:
         return redirect('/login')
     images = []
-    with g.db.cursor() as cursor:
-        sql_get_user_id = "SELECT user_id FROM users WHERE username = %s"
-        cursor.execute(sql_get_user_id, (username,))
-        user_id = cursor.fetchone()['user_id']
-
-        default_images = getImages('admin')
+    
+    user_id = checkUserExists(username=username)
+    if user_id:
         images = getImages(username)
+    else:
+        return redirect('/logout')
+    default_images = getImages('admin')
     return render_template('home.html', username=username, images=images, default_images=default_images)
 
 @app.route('/get_image/<image_id>', methods=['GET'])
@@ -231,18 +248,15 @@ def get_image(image_id):
     if not cookie:
         return redirect('/login')
     try:
-        with g.db.cursor() as cursor:
-            sql_get_image = "SELECT * FROM images WHERE image_id = %s"
-            cursor.execute(sql_get_image, (image_id,))
-            image = cursor.fetchone()
-            
-            if image:
-                image_data = image['image']
-                metadata = json.loads(image['metadata'])
-                headers = {'Content-Type': metadata['content-type']}
-                return make_response(image_data, 200, headers)
-            else:
-                return jsonify(success=False, message="Image not found")
+        image = db.session.query(Image).filter(Image.image_id == image_id).one_or_none()
+        
+        if image:
+            image_data = image.image
+            metadata = json.loads(image.metadata)
+            headers = {'Content-Type': metadata['content-type']}
+            return make_response(image_data, 200, headers)
+        else:
+            return jsonify(success=False, message="Image not found")
     except Exception as e:
         print("Error:", e)
         return jsonify(success=False, message="Failed to get image")
@@ -260,20 +274,19 @@ def delete_images():
         if not data:
             return jsonify(success=False, message="No image selected")
         image_ids = [int(x) for x in data.split(',')]
-        
-        with g.db.cursor() as cursor:
-            sql_admin_images = "SELECT image_id FROM images WHERE user_id = 1"
-            cursor.execute(sql_admin_images)
-            admin_images = cursor.fetchall()
-            
-            if current_user != 'admin' and all([image_id in [x['image_id'] for x in admin_images] for image_id in image_ids]):
-                return jsonify(success=False, message="Cannot delete default images")
-            
-            sql_delete_images = "DELETE FROM images WHERE image_id IN %s AND user_id = (SELECT user_id FROM users WHERE username = %s)"
-            params = (tuple(image_ids), current_user)
-            cursor.execute(sql_delete_images, params)
-            g.db.commit()
-            return jsonify(success=True, message="Images deleted successfully")
+
+        admin_images = db.session.query(Image.image_id).filter(Image.user_id == 1).all()
+        admin_images = [x[0] for x in admin_images]  # Convert list of tuples to list
+
+        if current_user != 'admin' and all(image_id in admin_images for image_id in image_ids):
+            return jsonify(success=False, message="Cannot delete default images")
+
+        user = db.session.query(User).filter(User.username == current_user).one_or_none()
+        if user:
+            db.session.query(Image).filter(and_(Image.image_id.in_(image_ids), Image.user_id == user.id)).delete(synchronize_session=False)
+            db.session.commit()
+
+        return jsonify(success=True, message="Images deleted successfully")
     except Exception as e:
         print("Error:", e)
         return jsonify(success=False, message="Failed to delete images")
@@ -303,7 +316,7 @@ def upload():
     if request.method == 'POST':
         try:
             file_type = request.form.get('file_type')
-            
+
             if file_type not in ['image', 'audio']:
                 return jsonify(success=False, message="Invalid file type")
 
@@ -312,40 +325,38 @@ def upload():
             if not files:
                 return jsonify(success=False, message="No files uploaded")
 
-            user_id = None
-            
-            with g.db.cursor() as cursor:
-                sql_get_user_id = "SELECT user_id FROM users WHERE username = %s"
-                cursor.execute(sql_get_user_id, (current_user,))
-                user_id = cursor.fetchone()['user_id']
+            user = db.session.query(User).filter(User.username == current_user).one_or_none()
+            if not user:
+                return jsonify(success=False, message="User not found")
 
             for file in files:
                 filename = secure_filename(file.filename)
                 file_data = file.read()
-                file_metadata = json.dumps({"filename": filename, "user_id": user_id, "file_type": file_type, "content-type": file.content_type})
-                table_name = f"{file_type}s" 
+                file_metadata = json.dumps({"filename": filename, "user_id": user.id, "file_type": file_type, "content-type": file.content_type})
 
-                with g.db.cursor() as cursor:
-                    sql_check_file = f"SELECT COUNT(*) FROM {table_name} WHERE filename = %s AND user_id = %s"
-                    cursor.execute(sql_check_file, (filename, user_id))
-                    count = cursor.fetchone()['COUNT(*)']
-
+                if file_type == 'image':
+                    existing_file = db.session.query(Image).filter(and_(Image.filename == filename, Image.user_id == user.id)).first()
                     i = 1
-                    while count > 0:
+                    while existing_file:
                         filename = f"{filename}_{i}"
-                        cursor.execute(sql_check_file, (filename, user_id))
-                        count = cursor.fetchone()['COUNT(*)']
+                        existing_file = db.session.query(Image).filter(and_(Image.filename == filename, Image.user_id == user.id)).first()
                         i += 1
-
-                    sql_insert_file = f"INSERT INTO {table_name} (filename, user_id, {file_type}, metadata) VALUES (%s, %s, %s, %s)"
-                    cursor.execute(sql_insert_file, (filename, user_id, file_data, file_metadata))
-                    print("File uploaded")
-                    g.db.commit()
-
+                    new_file = Image(filename=filename, user_id=user.id, image=file_data, metadata=file_metadata)
+                    db.session.add(new_file)
+                elif file_type == 'audio':
+                    existing_file = db.session.query(Audio).filter(and_(Audio.filename == filename, Audio.user_id == user.id)).first()
+                    i = 1
+                    while existing_file:
+                        filename = f"{filename}_{i}"
+                        existing_file = db.session.query(Audio).filter(and_(Audio.filename == filename, Audio.user_id == user.id)).first()
+                        i += 1
+                    new_file = Audio(filename=filename, user_id=user.id, audio=file_data, metadata=file_metadata)
+                    db.session.add(new_file)
+            db.session.commit()
             return jsonify(success=True, message="Files uploaded successfully")
         except Exception as e:
             print("Error:", e)
-            return jsonify(success=False, message="Failed to upload") 
+            return jsonify(success=False, message="Failed to upload")
 
 @app.route('/user_details', methods=['GET'])
 @jwt_required()
@@ -354,20 +365,19 @@ def user_details():
     if not cookie:
         return redirect('/login')
     username = get_jwt_identity()
-    user_details = {}
-    with g.db.cursor() as cursor:
-        sql_get_user_id = "SELECT user_id, username, email FROM users WHERE username = %s"
-        cursor.execute(sql_get_user_id, (username,))
-        user_details = cursor.fetchone()
-        
-        sql_get_images = "SELECT count(*) FROM images WHERE user_id = %s"
-        cursor.execute(sql_get_images, (user_details['user_id'],))
-        images = cursor.fetchall()
-        sql_get_audios = "SELECT count(*) FROM audios WHERE user_id = %s"
-        cursor.execute(sql_get_audios, (user_details['user_id'],))
-        audios = cursor.fetchall()
-        user_details['images_cnt'] = images[0]['count(*)']
-        user_details['audios_cnt'] = audios[0]['count(*)']
+    user = db.session.query(User.id, User.username, User.email).filter(User.username == username).first()
+
+    if user:
+        user_details = {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'images_cnt': db.session.query(func.count()).filter(Image.user_id == user.id).scalar(),
+            'audios_cnt': db.session.query(func.count()).filter(Audio.user_id == user.id).scalar()
+        }
+    else:
+        user_details = {}
+
     return render_template('user_details.html', username=username, user_details=user_details)
 
 @app.route('/images-audio-database', methods=['GET'])
@@ -380,13 +390,6 @@ def images_audio_database():
     if current_user != 'admin':
         print("Error: Current user does not match requested user.")
         abort(403)
-    images = []
-    audios = []
-    with g.db.cursor() as cursor:
-        sql_images = "SELECT * FROM images"
-        cursor.execute(sql_images)
-        images = cursor.fetchall()
-        sql_audios = "SELECT * FROM audios"
-        cursor.execute(sql_audios)
-        audios = cursor.fetchall()
+    images = db.session.query(Image).all()
+    audios = db.session.query(Audio).all()
     return render_template('images_audio_database.html', username='admin', images=images, audios=audios)
