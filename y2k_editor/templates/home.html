@@ -88,10 +88,10 @@
                 </div>
                 <div class="image_gallery">
                     {% for image in default_images %}
-                        <div class="image-container" id="image-{{ image['image_id'] }}">
-                            <img src="{{ url_for('get_image',image_id=image['image_id']) }}" alt="image" data-filename="{{ image['filename'] }}">
-                            <input type="checkbox" id="checkbox-{{ image['image_id'] }}" class="image-checkbox" data-image-id="{{ image['image_id'] }}">
-                            <label for="checkbox-{{ image['image_id'] }}"></label>
+                        <div class="image-container" id="image-{{ image['id'] }}">
+                            <img src="{{ url_for('get_image',image_id=image['id']) }}" alt="image" data-filename="{{ image['filename'] }}">
+                            <input type="checkbox" id="checkbox-{{ image['id'] }}" class="image-checkbox" data-image-id="{{ image['id'] }}">
+                            <label for="checkbox-{{ image['id'] }}"></label>
                         </div>
                     {% endfor %}
                 </div>
@@ -101,10 +101,10 @@
                     </div>
                     <div class="image_gallery">
                         {% for image in images %}
-                            <div class="image-container" id="image-{{ image['image_id'] }}">
-                                <img src="{{ url_for('get_image',image_id=image['image_id']) }}" alt="image" data-filename="{{ image['filename'] }}">
-                                <input type="checkbox" id="checkbox-{{ image['image_id'] }}" class="image-checkbox" data-image-id="{{ image['image_id'] }}">
-                                <label for="checkbox-{{ image['image_id'] }}"></label>   
+                            <div class="image-container" id="image-{{ image['id'] }}">
+                                <img src="{{ url_for('get_image',image_id=image['id']) }}" alt="image" data-filename="{{ image['filename'] }}">
+                                <input type="checkbox" id="checkbox-{{ image['id'] }}" class="image-checkbox" data-image-id="{{ image['id'] }}">
+                                <label for="checkbox-{{ image['id'] }}"></label>
                             </div>
                         {% endfor %}
                     </div>
@@ -139,7 +139,7 @@
                 resultsGallery.className = 'image_gallery';
         
                 for (var i = 0; i < galleries.length; i++) {
-                    var images = galleries[i].getElementsByTagName('img');
+                    var images = galleries[i].getElementsBy
                     for (var j = 0; j < images.length; j++) {
                         var filename = images[j].getAttribute('data-filename').toLowerCase();
         

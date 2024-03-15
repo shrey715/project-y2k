@@ -102,7 +102,8 @@
                 maxFilesize: 5, 
                 addRemoveLinks: true,
                 autoProcessQueue: false,
-                dictDefaultMessage: 'Drag an image here to upload, or click to select one'
+                dictDefaultMessage: 'Drag an image here or click to select and upload upto 5 images at a time',
+                parallelUploads: 5
             });
         
             imageDropzone.on("addedfile", function(file) {
@@ -117,7 +118,8 @@
                 maxFilesize: 5, 
                 addRemoveLinks: true,
                 autoProcessQueue: false,
-                dictDefaultMessage: 'Drag an audio file here to upload, or click to select one'
+                dictDefaultMessage: 'Drag an audio file or click to select and upload upto 5 audios at a time',
+                parallelUploads: 5
             });
         
             document.getElementById("submitImage").addEventListener("click", function() {
