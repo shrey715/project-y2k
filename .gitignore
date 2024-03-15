@@ -17,8 +17,6 @@ build/
 *.egg-info/
 
 # Ignore Python environments
-*.env
-.env/
 
 # Ignore Jupyter Notebook
 .ipynb_checkpoints/
