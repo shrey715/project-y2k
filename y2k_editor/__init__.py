@@ -14,10 +14,6 @@ import json
 from dotenv import load_dotenv
 from sqlalchemy import select, func, and_
 import sqlalchemy_cockroachdb 
-
-print("CockroachDB:", sqlalchemy_cockroachdb.__version__)
-print("Imported modules")
-
 load_dotenv()
 
 app=Flask(__name__)
@@ -36,17 +32,10 @@ CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
 db = SQLAlchemy(app)
 
-print("Database URI:", app.config['SQLALCHEMY_DATABASE_URI'])
-print("Database:", db)
-print("App:", app)
-print("Connected to database")
-
 from y2k_editor.models import User, Audio, Image, DBProject
 with app.app_context():
     db.create_all()
     
-print("Created tables")
-
 def initPreloadedLibrary():
     directory = 'static/audio/preloaded'
     audio_files = glob.glob(os.path.join(directory, '*.mp3'))
@@ -72,7 +61,12 @@ def initPreloadedLibrary():
 def getImages(username):
     user = User.query.filter_by(username=username).first()
     if user:
-        return Image.query.filter_by(user_id=user.id).all()
+        images = Image.query.with_entities(
+            Image.id,
+            Image.filename
+        ).filter_by(user_id=user.id).all()
+        images_list = [{'id': image.id, 'filename': image.filename} for image in images]
+        return images_list
     return []
         
 def getAudios(username):
@@ -248,12 +242,13 @@ def get_image(image_id):
     if not cookie:
         return redirect('/login')
     try:
-        image = db.session.query(Image).filter(Image.image_id == image_id).one_or_none()
+        image = db.session.query(Image).filter(Image.id == image_id).one_or_none()
         
         if image:
             image_data = image.image
-            metadata = json.loads(image.metadata)
-            headers = {'Content-Type': metadata['content-type']}
+            headers = {
+                'Content-Type': image.file_metadata['content-type']
+            }
             return make_response(image_data, 200, headers)
         else:
             return jsonify(success=False, message="Image not found")
@@ -275,7 +270,7 @@ def delete_images():
             return jsonify(success=False, message="No image selected")
         image_ids = [int(x) for x in data.split(',')]
 
-        admin_images = db.session.query(Image.image_id).filter(Image.user_id == 1).all()
+        admin_images = db.session.query(Image.id).filter(Image.user_id == 1).all()
         admin_images = [x[0] for x in admin_images]  # Convert list of tuples to list
 
         if current_user != 'admin' and all(image_id in admin_images for image_id in image_ids):
@@ -283,7 +278,7 @@ def delete_images():
 
         user = db.session.query(User).filter(User.username == current_user).one_or_none()
         if user:
-            db.session.query(Image).filter(and_(Image.image_id.in_(image_ids), Image.user_id == user.id)).delete(synchronize_session=False)
+            db.session.query(Image).filter(and_(Image.id.in_(image_ids), Image.user_id == user.id)).delete(synchronize_session=False)
             db.session.commit()
 
         return jsonify(success=True, message="Images deleted successfully")
@@ -332,7 +327,7 @@ def upload():
             for file in files:
                 filename = secure_filename(file.filename)
                 file_data = file.read()
-                file_metadata = json.dumps({"filename": filename, "user_id": user.id, "file_type": file_type, "content-type": file.content_type})
+                file_metadata = {"filename": filename, "user_id": user.id, "file_type": file_type, "content-type": file.content_type}
 
                 if file_type == 'image':
                     existing_file = db.session.query(Image).filter(and_(Image.filename == filename, Image.user_id == user.id)).first()
@@ -341,7 +336,7 @@ def upload():
                         filename = f"{filename}_{i}"
                         existing_file = db.session.query(Image).filter(and_(Image.filename == filename, Image.user_id == user.id)).first()
                         i += 1
-                    new_file = Image(filename=filename, user_id=user.id, image=file_data, metadata=file_metadata)
+                    new_file = Image(filename=filename, user_id=user.id, image=file_data, file_metadata=file_metadata)
                     db.session.add(new_file)
                 elif file_type == 'audio':
                     existing_file = db.session.query(Audio).filter(and_(Audio.filename == filename, Audio.user_id == user.id)).first()
@@ -350,7 +345,7 @@ def upload():
                         filename = f"{filename}_{i}"
                         existing_file = db.session.query(Audio).filter(and_(Audio.filename == filename, Audio.user_id == user.id)).first()
                         i += 1
-                    new_file = Audio(filename=filename, user_id=user.id, audio=file_data, metadata=file_metadata)
+                    new_file = Audio(filename=filename, user_id=user.id, audio=file_data, file_metadata=file_metadata)
                     db.session.add(new_file)
             db.session.commit()
             return jsonify(success=True, message="Files uploaded successfully")
