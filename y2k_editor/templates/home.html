@@ -109,9 +109,10 @@
                         {% endfor %}
                     </div>
                 {% endif %}
+                <!--
                 <div id="video-bar" onclick="createVideo()">
                     <span>Create Video</span>
-                </div>
+                </div>-->
                 <div id="delete-images" onclick="deleteImages()">
                     <span>Delete Images</span>
                 </div>
@@ -183,19 +184,16 @@
             });
 
             var checkboxes = document.getElementsByClassName('image-checkbox');
-            var videoBar = document.getElementById('video-bar');
             var deleteBar = document.getElementById('delete-images');
 
             for (var i = 0; i < checkboxes.length; i++) {
                 checkboxes[i].addEventListener('change', function() {
                     for (var j = 0; j < checkboxes.length; j++) {
                         if (checkboxes[j].checked) {
-                            videoBar.classList.add('visible');
                             deleteBar.classList.add('visible');
                             return;
                         }
                     }
-                    videoBar.classList.remove('visible');
                     deleteBar.classList.remove('visible');
                 });
             }
