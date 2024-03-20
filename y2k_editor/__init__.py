@@ -364,7 +364,7 @@ def video_editor():
         return redirect('/login')
     current_user = get_jwt_identity()
     image_files = getImages(current_user)
-    audio_files = getAudios(current_user)
+    audio_files = getAudios('admin') + getAudios(current_user)
     print("Image files:", image_files)
     print(type(image_files))
     return render_template('create_video.html', username=current_user, images=image_files, audios=audio_files, timeline_images=[], timeline_audios=[])
@@ -460,6 +460,19 @@ def images_audio_database():
     audios = db.session.query(Audio).all()
     return render_template('images_audio_database.html', username='admin', images=images, audios=audios)
 
+@app.route('/view_video', methods=['GET'])
+@csrf.exempt
+def view_video():
+    try:
+        with open("temp/output_video.mp4", "rb") as f:
+            video_data = f.read()
+        headers = {'Content-Type': 'video/mp4'}
+        resp = make_response(video_data, 200, headers)
+        return resp
+    except Exception as e:
+        print("Error:", e)
+        return jsonify(success=False, message="Failed to view video. Not exists")
+
 @app.route('/render_video', methods=['POST'])
 @csrf.exempt
 def render_video():
@@ -489,7 +502,8 @@ def render_video():
         audio = audio.audio
     
     output_video = renderVideo(images, audio, image_durations, transitions, resolution, fps)
+    with open("temp/output_video.mp4", "wb") as f:
+        f.write(output_video)
     
-    headers = {'Content-Type': 'video/mp4'}
-    resp = make_response(output_video, 200, headers)
+    resp = make_response('/view_video', 200)
     return resp
