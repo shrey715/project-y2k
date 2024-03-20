@@ -16,7 +16,8 @@ class Image(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     filename = db.Column(db.String(255))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    image = db.Column(db.LargeBinary(), nullable=False) # Change to filepaths?
+    # image = db.Column(db.LargeBinary(), nullable=False) # Change to filepaths?
+    image = db.Column(db.LargeBinary().with_variant(LONGBLOB, 'mysql'), nullable=False)
     file_metadata = db.Column('metadata', db.JSON)
     used_in_projects = db.Column(db.Integer, default=0)
     
@@ -28,7 +29,8 @@ class Audio(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     filename = db.Column(db.String(255))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    audio = db.Column(db.LargeBinary(), nullable=False) 
+    audio = db.Column(db.LargeBinary().with_variant(LONGBLOB, 'mysql'), nullable=False)
+    # audio = db.Column(db.LargeBinary(), nullable=False) 
     file_metadata = db.Column('metadata', db.JSON)
     used_in_projects = db.Column(db.Integer, default=0)
 
