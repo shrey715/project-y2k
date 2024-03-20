@@ -78,11 +78,15 @@
                     <button id="add-audio" class="project-control-btn" onclick="addAudio()">Add Audio</button>
                 </div>
                 <div class="project-control-right">
+                    <select id="resolution" name="resolution">
+                        <option value="360p">360p</option>
+                        <option value="720p">720p</option>
+                    </select>
                     <button id="preview-video" class="project-control-btn" onclick="previewVideo()">Preview Video</button>
                     <button id="save-video" class="project-control-btn" onclick="saveVideo()">Export Video</button>
                 </div>
             </div>
-            <div class="preview">
+            <div class="project">
                 <div class="audio-timeline">
                     <div class="timeline-header">
                         <h3>Audio Timeline</h3>
@@ -104,7 +108,7 @@
                                 <input type="range" id="audio-duration" name="duration" min="1" max="15">
                                 <span id="audio-duration-value"></span>
                             </div>
-                            <button id="set-audio" disabled>Set Audio</button>
+                            <button id="set-audio" onclick="setAudio()" disabled>Set Audio</button>
                         </div>
                         <div id="image-options" class="editor-options show">
                             <h3>Image Effects</h3>
@@ -123,7 +127,7 @@
                                     <option value="hblur">Horizontal Blur</option>
                                     <option value="fadegrays">Fade Grays</option>
                                     <option value="fadeblack">Fade Black</option>
-                                    <option value="fadewhite">Fade White</option>
+                                    <option value="fadew    te">Fade White</option>
                                     <option value="rectcrop">Rectangle Crop</option>
                                     <option value="circlecrop">Circle Crop</option>
                                     <option value="wipeleft">Wipe Left</option>
@@ -144,7 +148,7 @@
                                 <h3>Image Duration</h3>
                                 <input type="number" id="image-duration" name="duration" min="1" max="15" value="5">
                             </div>
-                            <button id="set-image" disabled>Set Image</button>
+                            <button id="set-image" onclick="setImage()" disabled>Set Image</button>
                         </div>
                     </div>
                 </div>
@@ -187,7 +191,7 @@
                                     <audio controls>
                                         <source src="{{ url_for('get_audio', audio_id=audio.id) }}" type="audio/mpeg">
                                     </audio>
-                                    <button onclick="selectAudio(this, {{audio.id}}, '{{audio.filename}}')">Select</button>
+                                    <button onclick="selectAudio(this, BigInt({{audio.id}}), '{{audio.filename}}')">Select</button>
                                 </div>
                             </li>
                             {% endfor %}
@@ -224,12 +228,12 @@
 
             function selectImage(imageDiv, imageId, imageFilename) {
                 var imageObject = {
-                    id: imageId+1n,
+                    image_id: imageId+1n,
                     filename: imageFilename,
                 }
                 if (imageDiv.classList.contains('selected')) {
                     imageDiv.classList.remove('selected');
-                    selectedImages = selectedImages.filter(image => image.id !== imageId);
+                    selectedImages = selectedImages.filter(image => image.id !== imageId+1n);
                 } else {
                     imageDiv.classList.add('selected');
                     selectedImages.push(imageObject);
@@ -238,13 +242,13 @@
 
             function selectAudio(audioBtn, audioId, audioFilename) {
                 var audioObject = {
-                    id: audioId,
+                    audio_id: audioId+1n,
                     filename: audioFilename,
                 }
                 audioDiv = audioBtn.parentElement;
                 if (audioDiv.classList.contains('selected')) {
                     audioDiv.classList.remove('selected');
-                    selectedAudios = selectedAudios.filter(audio => audio.id !== audioId);
+                    selectedAudios = selectedAudios.filter(audio => audio.id !== audioId+1n);
                 } else {
                     audioDiv.classList.add('selected');
                     selectedAudios.push(audioObject);
@@ -282,7 +286,8 @@
             }
 
             var getImageUrlPattern = "{{ url_for('get_image', image_id='__ID__') }}";
-        
+            var getAudioUrlPattern = "{{ url_for('get_audio', audio_id='__ID__') }}";
+
             var currentImageIndex = 0;
 
             function updateImageTimeline() {
@@ -337,8 +342,12 @@
                 audioIndex = -1;
                 var preview = document.querySelector('.preview');
                 preview.innerHTML = '';
+
                 imageIndex = imageToSetDiv.getAttribute('for');
                 var imageUrl = getImageUrlPattern.replace('__ID__', timelineImages[imageIndex].id);
+                var image = document.createElement('img');
+                image.src = imageUrl;
+                preview.appendChild(image);
             }
 
             function addAudioProperties(audioToSet) {
@@ -347,10 +356,127 @@
                 imageButton.disabled = true;
                 audioButton.disabled = false;
 
-                var audioPreview = document.querySelector('.audio-preview');
+                imageIndex = -1;
+                var preview = document.querySelector('.preview');
+                preview.innerHTML = '';
+
                 audioIndex = audioToSet.getAttribute('name');
+                var audio = document.createElement('audio');
+                audio.controls = true;
+                audio.src = getAudioUrlPattern.replace('__ID__', timelineAudios[audioIndex].id);
+                preview.appendChild(audio);
             }
 
+            function setAudio(){
+                if(audioIndex == -1){
+                    alert('Please select an audio to set');
+                } else {
+                    var volumne = document.getElementById('volume').value;
+                    var duration = document.getElementById('audio-duration').value;
+                    timelineAudios[audioIndex].volume = volumne;
+                    timelineAudios[audioIndex].duration = duration;
+                    console.log(timelineAudios[audioIndex]);
+                }
+            }
+
+            function setImage(){
+                if(imageIndex == -1){
+                    alert('Please select an image to set');
+                } else {
+                    var transition = document.getElementById('image-transition').value;
+                    var background = document.getElementById('background-overlay').value;
+                    var duration = document.getElementById('image-duration').value;
+                    timelineImages[imageIndex].transition = {   
+                        name: transition,
+                        duration: 1
+                    }
+                    timelineImages[imageIndex].background_color = background;
+                    timelineImages[imageIndex].duration = duration;
+                    console.log(timelineImages[imageIndex]);
+                }
+            }
+
+            var videoURL = '';
+
+            function previewVideo(){
+                var preview = document.querySelector('.preview');
+                preview.innerHTML = '';
+                var video = document.createElement('video');
+                video.controls = true;
+                video.autoplay = true;
+
+                var projectName = document.getElementById('project-name').value;
+
+                var jsonObjectToSend = {
+                    'info': {
+                        'title': projectName,
+                        'resolution': [640, 360],
+                        'framerate': 12
+                    },
+                    'video': {
+                        'images': timelineImages,
+                        'audios': timelineAudios,
+                    }
+                }
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/render_video',
+                    data: JSON.stringify(jsonObjectToSend),
+                    contentType: 'application/json',
+                    success: function(data) {
+                        console.log(data);
+                        videoURL = data;
+                        video.src = videoURL;
+                    },
+                    error: function(error) {
+                        console.log(error);
+                        alert('Error in rendering video');
+                    }
+                });
+                preview.appendChild(video);
+            }
+
+            function saveVideo(){
+                var projectName = document.getElementById('project-name').value;
+                var resolution = document.getElementById('resolution').value;
+
+                if(resolution == '360p'){
+                    resolution = [640, 360];
+                } else {
+                    resolution = [1280, 720];
+                }
+
+                var jsonObjectToSend = {
+                    'info': {
+                        'title': projectName,
+                        'resolution': resolution,
+                        'framerate': 12
+                    },
+                    'video': {
+                        'images': timelineImages,
+                        'audios': timelineAudios,
+                    }
+                }
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/render_video',
+                    data: JSON.stringify(jsonObjectToSend),
+                    contentType: 'application/json',
+                    success: function(data) {
+                        console.log(data);
+                        var a = document.createElement('a');
+                        a.href = data;
+                        a.download = projectName + '.mp4';
+                        a.click();
+                    },
+                    error: function(error) {
+                        console.log(error);
+                        alert('Error in rendering video');
+                    }
+                });
+            }
         </script>
     </body>
 </html>
