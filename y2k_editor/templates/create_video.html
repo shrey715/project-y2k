@@ -90,15 +90,7 @@
                 </div>
                 <div class="video-player">
                     <div class="preview">
-                        <div class="image-preview">
-
-                        </div>
-                        <div class="audio-preview">
-
-                        </div>
-                        <div class="video-preview">
-
-                        </div>
+                        
                     </div>
                     <div class="editor">
                         <div id="audio-options" class="editor-options">
@@ -304,6 +296,8 @@
                 timelineImages.forEach(image => {
                     var imageDiv = document.createElement('div');
                     imageDiv.classList.add('timeline-image');
+                    imageDiv.setAttribute('onclick', 'addImageProperties(this)');
+                    imageDiv.setAttribute('for', imgcnt);
                     var imageUrl = getImageUrlPattern.replace('__ID__', image.id);
                     imageDiv.innerHTML = `<img src="${imageUrl}" alt="image" name="${imgcnt}">`;
                     console.log(imageUrl);
@@ -324,12 +318,39 @@
                     audioDiv.classList.add('timeline-audio');
                     var audiocnt = 0;
                     audioDiv.innerHTML = `
-                        <p name="${audiocnt}" onclick="">${audio.filename}</p>
+                        <p name="${audiocnt}" onclick="addAudioProperties(this)">${audio.filename}</p>
                     `;
                     audiocnt++;
                     audioTimeline.appendChild(audioDiv);
                 });
             }
+
+            imageIndex = -1;
+            audioIndex = -1;
+
+            function addImageProperties(imageToSetDiv) {
+                var imageButton = document.getElementById('set-image');
+                var audioButton = document.getElementById('set-audio'); 
+                audioButton.disabled = true;
+                imageButton.disabled = false;
+
+                audioIndex = -1;
+                var preview = document.querySelector('.preview');
+                preview.innerHTML = '';
+                imageIndex = imageToSetDiv.getAttribute('for');
+                var imageUrl = getImageUrlPattern.replace('__ID__', timelineImages[imageIndex].id);
+            }
+
+            function addAudioProperties(audioToSet) {
+                var imageButton = document.getElementById('set-image');
+                var audioButton = document.getElementById('set-audio'); 
+                imageButton.disabled = true;
+                audioButton.disabled = false;
+
+                var audioPreview = document.querySelector('.audio-preview');
+                audioIndex = audioToSet.getAttribute('name');
+            }
+
         </script>
     </body>
 </html>
