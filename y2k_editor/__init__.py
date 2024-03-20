@@ -11,11 +11,11 @@ import hashlib
 import os
 import glob
 import json
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 from sqlalchemy import select, func, and_
-# import sqlalchemy_cockroachdb
+import sqlalchemy_cockroachdb
 from y2k_editor.video_creator import renderVideo
-# load_dotenv()
+load_dotenv()
 
 app=Flask(__name__)
 app.config["JWT_TOKEN_LOCATION"] = ["headers", "cookies", "json", "query_string"]
@@ -369,15 +369,6 @@ def video_editor():
     print(type(image_files))
     return render_template('create_video.html', username=current_user, images=image_files, audios=audio_files, timeline_images=[], timeline_audios=[])
 
-@app.route('/create_video', methods=['POST'])
-@jwt_required()
-@csrf.exempt
-def renderVideo():
-    cookie = request.cookies.get('access_token_cookie')
-    if not cookie:
-        return redirect('/login')
-        
-
 @app.route('/upload', methods=['GET','POST'])
 @jwt_required()
 @csrf.exempt
@@ -472,8 +463,10 @@ def images_audio_database():
 @app.route('/render_video', methods=['POST'])
 @csrf.exempt
 def render_video():
-    details = request.get_json()
-    vid_details = json.loads(details)
+    vid_details = request.get_json()
+    
+    print("Video details:", vid_details)
+    print("Type:", type(vid_details))
     
     fps = vid_details['info']['framerate']
     resolution = vid_details['info']['resolution']
@@ -486,17 +479,17 @@ def render_video():
         image_id = int(image_det['image_id'])
         image = db.session.query(Image).filter(Image.id == image_id).one_or_none()
         images.append(image.image)
-        transitions.append(image['transition']['name'])
+        transitions.append(image_det['transition']['name'])
         image_durations.append(int(image_det['duration']))
     
     audio = None
-    if vid_details['audio']:
-        audio_det = vid_details['audio'][0]['audio_id']
+    if 'audios' in vid_details and vid_details['audios']:
+        audio_det = vid_details['audios'][0]['audio_id']
         audio = db.session.query(Audio).filter(Audio.id == audio_det['audio_id']).one_or_none()
         audio = audio.audio
     
     output_video = renderVideo(images, audio, image_durations, transitions, resolution, fps)
     
-    headers = {'Content-Type': 'video/mpeg'}
+    headers = {'Content-Type': 'video/mp4'}
     resp = make_response(output_video, 200, headers)
     return resp
