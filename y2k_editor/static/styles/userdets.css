@@ -30,10 +30,8 @@
 
     background: rgba( 255, 255, 255, 0 );
     box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
-    backdrop-filter: blur( 10px );
-    -webkit-backdrop-filter: blur( 10px );
-    border-radius: 20px;
-    border: 1px solid rgba( 255, 255, 255, 0.18 );
+    border-radius: 5px;
+    border: 1px solid rgba( 255, 255, 255, 0.18 );    
 }
 
 .user-profile hr{
@@ -105,41 +103,42 @@
     color: var(--color-menu);
 }
 
-table {
+table{
     width: 50%;
     border-collapse: collapse;
     border-spacing: 0;
     border: 1px solid var(--color-white);
     font-size: 1.2rem;
-    font-weight: 200;
+    font-weight: 400;
     text-align: center;
     color: var(--color-white);
     margin: 0.5rem 0 1rem 0; 
 }
-thead {
+
+thead{
     background-color: var(--color-menu);
     color: var(--color-white);
 }
 
-th {
+th{
     padding: 1rem;
     text-align: center;
     background-color: var(--color-black);
 }
 
-tbody tr {
+tbody tr{
     background-color: var(--color-white);
     color: var(--color-white);
 }
 
-tbody tr td {
+tbody tr td{
     padding: 1rem;
     text-align: center;
     transition: all 0.3s ease-in-out;
     background-color: var(--color-menu);
 }
 
-tbody tr td:hover {
+tbody tr td:hover{
     cursor: pointer;
     background-color: var(--color-cyan);
     color: var(--color-black);

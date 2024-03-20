@@ -33,7 +33,7 @@
 }
 
 .main-content .table-container{
-    margin: 0 5rem;
+    margin: 0 3rem;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -80,3 +80,4 @@
     background-color: var(--color-cyan);
     color: var(--color-black);
 }
+

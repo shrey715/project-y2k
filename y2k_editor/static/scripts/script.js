@@ -9,9 +9,3 @@ function toggleMenu() {
     navbutton.classList.toggle('bxs-chevrons-left');
     navbutton.classList.toggle('bxs-chevrons-right');
 }
-
-function toggleProfile(){
-    var profile = document.getElementById("profileDropdown");
-    profile.classList.toggle("show-profile");
-}
-

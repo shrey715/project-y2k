@@ -72,7 +72,12 @@ def getImages(username):
 def getAudios(username):
     user = User.query.filter_by(username=username).first()
     if user:
-        return Audio.query.filter_by(user_id=user.id).all()
+        audios = Audio.query.with_entities(
+            Audio.id,
+            Audio.filename
+        ).filter_by(user_id=user.id).all()
+        audios_list = [{'id': audio.id, 'filename': audio.filename} for audio in audios]
+        return audios_list
     return []
 
 def checkUserExists(*, user_id: int = None, username: str = None, email: str = None):
@@ -96,6 +101,10 @@ def teardown_request(exception):
         db.session.commit()
     db.session.remove()    
     
+@jwt.unauthorized_loader
+def unauthorized_response(callback):
+    return redirect(url_for('login'))
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -107,7 +116,7 @@ def login():
     print("Cookie:", cookie)
     if cookie:
         current_user = decode_token(cookie)['sub']
-        if checkUserExists(g.db, username=current_user):
+        if checkUserExists(username=current_user):
             return redirect(url_for('user_dashboard', username=current_user))
         else:
             return redirect('/logout')
@@ -221,6 +230,9 @@ def admin_dashboard():
 @app.route('/user_dashboard', methods=['GET'])
 @jwt_required()
 def user_dashboard():
+    cookie = request.cookies.get('access_token_cookie')
+    if not cookie:
+        return redirect('/login')
     username = get_jwt_identity()
     if username is None:
         return redirect('/login')
@@ -247,7 +259,8 @@ def get_image(image_id):
         if image:
             image_data = image.image
             headers = {
-                'Content-Type': image.file_metadata['content-type']
+                'Content-Type': image.file_metadata['content-type'],
+                'Cache-Control': 'public, max-age={}'.format(timedelta(days=7).total_seconds()) 
             }
             return make_response(image_data, 200, headers)
         else:
@@ -255,6 +268,28 @@ def get_image(image_id):
     except Exception as e:
         print("Error:", e)
         return jsonify(success=False, message="Failed to get image")
+            
+@app.route('/get_audio/<audio_id>', methods=['GET'])
+@jwt_required()
+@csrf.exempt
+def get_audio(audio_id):
+    cookie = request.cookies.get('access_token_cookie')
+    if not cookie:
+        return redirect('/login')
+    try:
+        audio = db.session.query(Audio).filter(Audio.id == audio_id).one_or_none()
+        if audio:
+            audio_data = audio.audio
+            headers = {
+                'Content-Type': audio.file_metadata['content-type'],
+                'Cache-Control': 'public, max-age={}'.format(timedelta(days=7).total_seconds()) 
+            }
+            return make_response(audio_data, 200, headers)
+        else:
+            return jsonify(success=False, message="Audio not found")
+    except Exception as e:
+        print("Error:", e)
+        return jsonify(success=False, message="Failed to get audio")
             
 @app.route('/delete_images')
 @jwt_required()
@@ -285,7 +320,37 @@ def delete_images():
     except Exception as e:
         print("Error:", e)
         return jsonify(success=False, message="Failed to delete images")
-        
+  
+@app.route('/delete_audios')
+@jwt_required()
+@csrf.exempt
+def delete_audios():
+    cookie = request.cookies.get('access_token_cookie')
+    if not cookie:
+        return redirect('/login')
+    current_user = get_jwt_identity()
+    try:
+        data = request.args.get('audio_ids')
+        if not data:
+            return jsonify(success=False, message="No audio selected")
+        audio_ids = [int(x) for x in data.split(',')]
+
+        admin_audios = db.session.query(Audio.id).filter(Audio.user_id == 1).all()
+        admin_audios = [x[0] for x in admin_audios]  # Convert list of tuples to list
+
+        if current_user != 'admin' and all(audio_id in admin_audios for audio_id in audio_ids):
+            return jsonify(success=False, message="Cannot delete default audios")
+
+        user = db.session.query(User).filter(User.username == current_user).one_or_none()
+        if user:
+            db.session.query(Audio).filter(and_(Audio.id.in_(audio_ids), Audio.user_id == user.id)).delete(synchronize_session=False)
+            db.session.commit()
+
+        return jsonify(success=True, message="Audios deleted successfully")
+    except Exception as e:
+        print("Error:", e)
+        return jsonify(success=False, message="Failed to delete audios")  
+      
 @app.route('/video_editor', methods=['GET'])
 @jwt_required()
 @csrf.exempt
@@ -296,7 +361,18 @@ def video_editor():
     current_user = get_jwt_identity()
     image_files = getImages(current_user)
     audio_files = getAudios(current_user)
-    return render_template('create_video.html',username=current_user, image_files=image_files, audio_files=audio_files)
+    print("Image files:", image_files)
+    print(type(image_files))
+    return render_template('create_video.html', username=current_user, images=image_files, audios=audio_files)
+
+@app.route('/create_video', methods=['POST'])
+@jwt_required()
+@csrf.exempt
+def create_video():
+    cookie = request.cookies.get('access_token_cookie')
+    if not cookie:
+        return redirect('/login')
+        
 
 @app.route('/upload', methods=['GET','POST'])
 @jwt_required()

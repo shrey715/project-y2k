@@ -88,7 +88,7 @@
                 </div>
                 <div class="image_gallery">
                     {% for image in default_images %}
-                        <div class="image-container" id="image-{{ image['id'] }}">
+                        <div class="image-container" id="image-{{ image['id'] }}" >
                             <img src="{{ url_for('get_image',image_id=image['id']) }}" alt="image" data-filename="{{ image['filename'] }}">
                             <input type="checkbox" id="checkbox-{{ image['id'] }}" class="image-checkbox" data-image-id="{{ image['id'] }}">
                             <label for="checkbox-{{ image['id'] }}"></label>
@@ -117,6 +117,16 @@
                 </div>
             </div>
         </div>
+        <div id="imageModal" class="modal">
+            <span class="close">
+                <i class='bx bx-x'></i>
+            </span>
+            <div class="modal-image-container">
+                <img id="modalImage">
+            </div>
+            <div id="modal-caption"></div>
+        </div>
+        </div>
         <script src="{{ url_for('static', filename='scripts/script.js') }}" async defer></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
@@ -139,7 +149,7 @@
                 resultsGallery.className = 'image_gallery';
         
                 for (var i = 0; i < galleries.length; i++) {
-                    var images = galleries[i].getElementsBy
+                    var images = galleries[i].getElementsByTagName('img');
                     for (var j = 0; j < images.length; j++) {
                         var filename = images[j].getAttribute('data-filename').toLowerCase();
         
@@ -213,6 +223,28 @@
                 .catch((error) => {
                     console.error('Error:', error);
                 });
+            }
+
+            var modal = document.getElementById("imageModal");
+            var modalImg = document.getElementById("modalImage");
+            var modalCaption = document.getElementById("modal-caption");
+
+            var images = document.getElementsByTagName('img');
+            for (var i = 0; i < images.length; i++) {
+                var img = images[i];
+                img.onclick = function(evt) {
+                    modal.style.display = "flex";
+                    modalImg.src = this.src;
+                    modalCaption.innerHTML = this.getAttribute('data-filename');
+                }
+            }
+            modalImg.onclick = function(evt) {
+                evt.stopPropagation(); 
+            }
+
+            var span = document.getElementsByClassName("close")[0];
+            span.onclick = function() { 
+                modal.style.display = "none";
             }
         </script>
     </body>
