@@ -151,10 +151,9 @@ def login():
 @csrf.exempt
 def signup():
     cookie = request.cookies.get('access_token_cookie')
-    if cookie:
-        current_user = get_jwt_identity()
-        
-        if checkUserExists(g.db, username=current_user):
+    if cookie:        
+        current_user = decode_token(cookie)['sub']
+        if checkUserExists(username=current_user):
             return redirect(f'/user_dashboard')
         else:
             return redirect('/logout')
@@ -234,8 +233,9 @@ def user_dashboard():
     if not cookie:
         return redirect('/login')
     username = get_jwt_identity()
-    if username is None:
-        return redirect('/login')
+    if not checkUserExists(username=username):
+        return redirect(f'/logout')
+        
     images = []
     
     user_id = checkUserExists(username=username)
@@ -254,8 +254,10 @@ def get_image(image_id):
     if not cookie:
         return redirect('/login')
     try:
+        image_id = int(image_id)
+        print("Image ID:", image_id)
+        print("Type:", type(image_id))
         image = db.session.query(Image).filter(Image.id == image_id).one_or_none()
-        
         if image:
             image_data = image.image
             headers = {
@@ -363,7 +365,7 @@ def video_editor():
     audio_files = getAudios(current_user)
     print("Image files:", image_files)
     print(type(image_files))
-    return render_template('create_video.html', username=current_user, images=image_files, audios=audio_files)
+    return render_template('create_video.html', username=current_user, images=image_files, audios=audio_files, timeline_images=[], timeline_audios=[])
 
 @app.route('/create_video', methods=['POST'])
 @jwt_required()
