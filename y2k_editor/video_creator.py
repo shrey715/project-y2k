@@ -68,7 +68,7 @@ if __name__=='__main__':
     vc = VideoCreator()
     image_clip_1 = vc.create_image_clip('test/4.jpg', 5)
     image_clip_2 = vc.create_image_clip('test/1.jpg', 5)
-    image_clip_3 = vc.create_image_clip('test/3.jpg', 5)
+    image_clip_3 = vc.create_image_clip('test/2.jpg', 5)
     
     video_clip = vc.concatenate_image_clips([image_clip_1, image_clip_2, image_clip_3])
     video_clip.write_videofile('test.mp4', fps=24)

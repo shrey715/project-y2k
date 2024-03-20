@@ -3,6 +3,227 @@
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Bungee&display=swap');
 
-.main-content{
-    
+body{
+    height: 95vh;
 }
+
+.main-content{
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+
+    padding: 1rem;
+    overflow: hidden;
+}
+
+.project-control{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+}
+
+.project-control-btn{
+    background-color: var(--color-menu);
+    color: var(--color-white);
+    border: none;
+    padding: 10px;
+    margin: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 1.2rem;
+    transition: all 0.3s ease-in-out;
+}
+
+.project-control-btn:hover{
+    background-color: var(--color-pink2);
+    color: var(--color-white);
+}
+
+.project-control-left{
+    width: 15%;
+}
+
+.project-control input{
+    width: 100%;
+    background-color: var(--color-menu);
+    color: var(--color-white);
+    border: none;
+    padding: 10px;
+    margin: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+    border: 2px solid transparent;
+    font-size: 1.2rem;
+    transition: all 0.3s ease-in-out;
+}
+
+.project-control input:hover{
+    border: 2px solid var(--color-pink2);
+}
+
+.project-control input:focus{
+    border: 2px solid var(--color-pink2);
+}
+
+.preview{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.image-preview,
+.video-preview,
+.audio-preview,
+.editor,
+.audio-timeline,
+.image-timeline{
+    background: rgba( 255, 255, 255, 0 );
+    box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
+    border-radius: 5px;
+    border: 1px solid rgba( 255, 255, 255, 0.18 );    
+}
+
+.audio-timeline{
+    width: 20%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.image-timeline{
+    width: 20%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.video-player{
+    width: 60%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    margin: 0 1rem;
+}
+
+.show{
+    display: flex;
+}
+
+.preview{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.editor{
+    width: 100%;
+    height: 40%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    margin: 0;
+}
+
+.editor-options{
+    width: 100%;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 1.2rem;
+}
+
+.edit-option-set{
+    width: 70%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.edit-option-set input{
+    width: 100%;
+    background-color: var(--color-menu);
+    color: var(--color-white);
+    border: none;
+    padding: 10px;
+    margin: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+    border: 2px solid transparent;
+    font-size: 1.2rem;
+    transition: all 0.3s ease-in-out;
+}
+
+.edit-option-set input:hover{
+    border: 2px solid var(--color-pink2);
+}
+
+.edit-option-set input:focus{
+    border: 2px solid var(--color-pink2);
+}
+
+.edit-option-set select{
+    width: 100%;
+    background-color: var(--color-menu);
+    color: var(--color-white);
+    border: none;
+    padding: 10px;
+    margin: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+    border: 2px solid transparent;
+    font-size: 1.2rem;
+    transition: all 0.3s ease-in-out;
+}
+
+.edit-option-set select:hover{
+    border: 2px solid var(--color-pink2);
+}
+
+.edit-option-set select:focus{
+    border: 2px solid var(--color-pink2);
+}
+
+.edit-option-set h3{
+    color: var(--color-white);
+    font-size: 1.2rem;
+    margin: 5px;
+}
+
+.editor-options button{
+    background-color: var(--color-menu);
+    color: var(--color-white);
+    border: none;
+    padding: 10px;
+    margin: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 1.2rem;
+    transition: all 0.3s ease-in-out;
+}
+
+.editor-options button:hover{
+    background-color: var(--color-pink2);
+    color: var(--color-white);
+}
+

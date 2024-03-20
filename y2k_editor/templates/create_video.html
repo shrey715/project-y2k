@@ -69,28 +69,96 @@
             </ul>
         </nav>
         <div class="main-content">
-            <div class="editor">
-                <div class="audio-image-panel">
-                    <div class="audio-selection">
-                        
-                    </div>
-                    <div class="image-selection">
-                        
-                    </div>
+            <div class="project-control">
+                <div class="project-control-left">
+                    <input type="text" id="project-name" placeholder="Project Name">
                 </div>
-                <div class="video-preview">
-                    
-                </div> 
-                <div class="edit-panel">
-                    <div class="edit-options">
-                       
-                    </div>
+                <div class="project-control-center">
+                    <button id="add-image" class="project-control-btn" onclick="addImage()">Add Image</button>
+                    <button id="add-audio" class="project-control-btn" onclick="addAudio()">Add Audio</button>
+                </div>
+                <div class="project-control-right">
+                    <button id="preview-video" class="project-control-btn" onclick="previewVideo()">Preview Video</button>
+                    <button id="save-video" class="project-control-btn" onclick="saveVideo()">Export Video</button>
                 </div>
             </div>
-            <div class="timeline">
-                
+            <div class="preview">
+                <div class="audio-timeline">
+                    <div class="timeline-header">
+                        <h3>Audio Timeline</h3>
+                    </div>
+                </div>
+                <div class="video-player">
+                    <div class="video-preview">
+
+                    </div>
+                    <div class="editor">
+                        <div id="image-options" class="editor-options show">
+                            <div class="edit-option-set">
+                                <h3>Transitions</h3>
+                                <select id="image-transition" name="image-transition">
+                                    <option value="dissolve">dissolve</option>
+                                    <option value="radial">radial</option>
+                                    <option value="circleopen">circleopen</option>
+                                    <option value="circleclose">circleclose</option>
+                                    <option value="pixelize">pixelize</option>
+                                    <option value="hlslice">hlslice</option>
+                                    <option value="hrslice">hrslice</option>
+                                    <option value="vuslice">vuslice</option>
+                                    <option value="vdslice">vdslice</option>
+                                    <option value="hblur">hblur</option>
+                                    <option value="fadegrays">fadegrays</option>
+                                    <option value="fadeblack">fadeblack</option>
+                                    <option value="fadewhite">fadewhite</option>
+                                    <option value="rectcrop">rectcrop</option>
+                                    <option value="circlecrop">circlecrop</option>
+                                    <option value="wipeleft">wipeleft</option>
+                                    <option value="wiperight">wiperight</option>
+                                    <option value="slidedown">slidedown</option>
+                                    <option value="slideup">slideup</option>
+                                    <option value="slideleft">slideleft</option>
+                                    <option value="slideright">slideright</option>
+                                    <option value="distance">distance</option>
+                                    <option value="diagtl">diagtl</option>
+                                </select>
+                            </div>
+                            <div class="edit-option-set">
+                                <h3>Background Overlay</h3>
+                                <input type="color" id="background-overlay" name="background-overlay" value="#000000">
+                            </div>
+                            <div class="edit-option-set">
+                                <h3>Duration</h3>
+                                <input type="number" id="duration" name="duration" min="1" max="15" value="5">
+                            </div>
+                            <button id="set-image">Set Image</button>
+                        </div>
+                        <div id="audio-options" class="editor-options">
+                            <div class="edit-option-set">
+                                <h3>Volume</h3>
+                                <input type="range" id="volume" name="volume" min="0" max="100" value="50">
+                            </div>
+                            <div class="edit-option-set">
+                                <h3>Start Time</h3>
+                                <input type="number" id="start-time" name="start-time" min="0" value="0">
+                            </div>
+                            <div class="edit-option-set">
+                                <h3>End Time</h3>
+                                <input type="number" id="end-time" name="end-time" min="0" value="100">
+                            </div>
+                            <button id="set-audio">Set Audio</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="image-timeline">
+                    <div class="timeline-header">
+                        <h3>Image Timeline</h3>
+                    </div>
+                </div>
             </div>
         </div>
         <script src="{{ url_for('static', filename='scripts/script.js') }}" async defer></script>
+        <script>
+
+        </script>
     </body>
 </html>

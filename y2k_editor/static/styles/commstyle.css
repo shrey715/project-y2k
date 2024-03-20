@@ -25,12 +25,16 @@ body{
     color: var(--color-white);
     font-size: 600;
     overflow-y: scroll;
-    height: auto;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
 }
 
 .sidebar {
     z-index: 1;
-    height: 100vh;
+    height: 100%;
     width: fit-content;
     position: fixed;
     top: 0;
@@ -144,14 +148,16 @@ body{
 }
 
 .main-content{
-    width: 96%;
-    height: 100%;
-    margin-left: auto;
+    width: 95%;
+    padding: 2rem;
+    margin-left: 3.5rem;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     color: var(--color-white);
+
+    overflow: scroll;
 }
 
 .nav-text.show-nav-text {

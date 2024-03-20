@@ -159,3 +159,31 @@
 .main-content h2:first-child{
     margin-top: 3rem;
 }
+
+.dz-success-mark svg, .dz-error-mark svg {
+    fill: #fff;
+    stroke: #000;
+    stroke-width: 2;
+    width: 50px;
+    height: 50px;
+}
+
+.dz-success-mark {
+    color: green;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    padding: 5px;
+}
+
+.dz-error-mark {
+    color: red;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    padding: 5px;
+}
+
+.dz-upload {
+    background-color: var(--color-orange);
+    height: 10px;
+    border-radius: 5px;
+}
