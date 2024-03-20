@@ -241,10 +241,11 @@ def user_dashboard():
     user_id = checkUserExists(username=username)
     if user_id:
         images = getImages(username)
+        audios = getAudios(username)
     else:
         return redirect('/logout')
-    default_images = getImages('admin')
-    return render_template('home.html', username=username, images=images, default_images=default_images)
+    default_audios = getAudios('admin')
+    return render_template('home.html', username=username, images=images, default_audios=default_audios, audios=audios)
 
 @app.route('/get_image/<image_id>', methods=['GET'])
 @jwt_required()

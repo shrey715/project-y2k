@@ -84,37 +84,58 @@
             </div>
             <div class="non-search-results">
                 <div class="image-gallery-header">
-                    <p>Default Images</p>
+                    <p>Your Images</p>
                 </div>
                 <div class="image_gallery">
-                    {% for image in default_images %}
-                        <div class="image-container" id="image-{{ image['id'] }}" >
+                    {% for image in images %}
+                        <div class="image-container" id="image-{{ image['id'] }}">
                             <img src="{{ url_for('get_image',image_id=image['id']) }}" alt="image" data-filename="{{ image['filename'] }}">
                             <input type="checkbox" id="checkbox-{{ image['id'] }}" class="image-checkbox" data-image-id="{{ image['id'] }}">
                             <label for="checkbox-{{ image['id'] }}"></label>
                         </div>
                     {% endfor %}
                 </div>
-                {% if username != 'admin' %}
-                    <div class="image-gallery-header">
-                        <p>Your Images</p>
-                    </div>
-                    <div class="image_gallery">
-                        {% for image in images %}
-                            <div class="image-container" id="image-{{ image['id'] }}">
-                                <img src="{{ url_for('get_image',image_id=image['id']) }}" alt="image" data-filename="{{ image['filename'] }}">
-                                <input type="checkbox" id="checkbox-{{ image['id'] }}" class="image-checkbox" data-image-id="{{ image['id'] }}">
-                                <label for="checkbox-{{ image['id'] }}"></label>
-                            </div>
-                        {% endfor %}
-                    </div>
+                <div class="audio-gallery-header">
+                    <p>Your Audios</p>
+                </div>
+                <div class="audio_gallery">
+                    {% for audio in audios %}
+                        <div class="audio-container" id="audio-{{ audio['id'] }}">
+                            <audio controls>
+                                <source src="{{ url_for('get_audio',audio_id=audio['id']) }}" type="audio/mpeg">
+                                Your browser does not support the audio element.
+                            </audio>
+                            <input type="checkbox" id="checkbox-{{ audio['id'] }}" class="audio-checkbox" data-image-id="{{ audio['id'] }}">
+                            <label for="checkbox-{{ audio['id'] }}"></label>
+                        </div>
+                    {% endfor %}
+                </div>
+                {% if username!='admin' %}
+                <div class="audio-gallery-header">
+                    <p>Default Audios</p>
+                </div>
+                <div class="audio_gallery">
+                    {% for audio in default_audios %}
+                        <div class="audio-container" id="audio-{{ audio['id'] }}">
+                            <audio controls>
+                                <source src="{{ url_for('get_audio',audio_id=audio['id']) }}" type="audio/mpeg">
+                                Your browser does not support the audio element.
+                            </audio>
+                            <input type="checkbox" id="checkbox-{{ audio['id'] }}" class="audio-checkbox" data-audio-id="{{ audio['id'] }}">
+                            <label for="checkbox-{{ audio['id'] }}"></label>
+                        </div>
+                    {% endfor %}
+                </div>
                 {% endif %}
                 <!--
                 <div id="video-bar" onclick="createVideo()">
                     <span>Create Video</span>
                 </div>-->
-                <div id="delete-images" onclick="deleteImages()">
-                    <span>Delete Images</span>
+                <div id="delete-images">
+                    <span onclick="deleteImages()">Delete Images</span>
+                </div>
+                <div id="delete-audio">
+                    <span onclick="deleteAudio()">Delete Audios</span>
                 </div>
             </div>
         </div>
@@ -183,11 +204,18 @@
                 }
             });
 
+            function disableOtherCheckboxes(checkboxesToDisable, shouldDisable) {
+                for (var i = 0; i < checkboxesToDisable.length; i++) {
+                    checkboxesToDisable[i].disabled = shouldDisable;
+                }
+            }
+
             var checkboxes = document.getElementsByClassName('image-checkbox');
             var deleteBar = document.getElementById('delete-images');
 
             for (var i = 0; i < checkboxes.length; i++) {
                 checkboxes[i].addEventListener('change', function() {
+                    disableOtherCheckboxes(document.getElementsByClassName('audio-checkbox'), this.checked);
                     for (var j = 0; j < checkboxes.length; j++) {
                         if (checkboxes[j].checked) {
                             deleteBar.classList.add('visible');
@@ -206,6 +234,47 @@
                     }
                 }
                 fetch('/delete_images?image_ids=' + imageIds.join(','), {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    console.log("Reloading page")
+                    location.reload();
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+            }
+
+            var audioCheckboxes = document.getElementsByClassName('audio-checkbox');
+            var deleteAudioBar = document.getElementById('delete-audio');
+
+            for (var i = 0; i < audioCheckboxes.length; i++) {
+                audioCheckboxes[i].addEventListener('change', function() {
+                    disableOtherCheckboxes(checkboxes, this.checked);
+                    for (var j = 0; j < audioCheckboxes.length; j++) {
+                        if (audioCheckboxes[j].checked) {
+                            deleteAudioBar.classList.add('visible');
+                            return;
+                        }
+                    }
+                    deleteAudioBar.classList.remove('visible');
+                });
+            }
+
+            function deleteAudio() {
+                var audioIds = [];
+                for (var i = 0; i < audioCheckboxes.length; i++) {
+                    if (audioCheckboxes[i].checked) {
+                        audioIds.push(audioCheckboxes[i].getAttribute('data-image-id'));
+                    }
+                }
+                fetch('/delete_audios?audio_ids=' + audioIds.join(','), {
                     method: 'GET',
                     credentials: 'include',
                     headers: {
