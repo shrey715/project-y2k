@@ -235,7 +235,7 @@ def user_dashboard():
     username = get_jwt_identity()
     if not checkUserExists(username=username):
         return redirect(f'/logout')
-        
+
     images = []
     
     user_id = checkUserExists(username=username)
