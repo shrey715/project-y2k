@@ -10,6 +10,7 @@
         <link rel="icon" href={{url_for('static',filename='images/logo-no-text.png')}} type="image/x-icon">
         <link rel="stylesheet" href={{url_for('static',filename='styles/commstyle.css')}}>
         <link rel="stylesheet" href={{url_for('static',filename='styles/videostyle.css')}}>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     </head>
     <body>
         <nav class="sidebar">
@@ -146,7 +147,7 @@
                             </div>
                             <div class="edit-option-set">
                                 <h3>Image Duration</h3>
-                                <input type="number" id="image-duration" name="duration" min="1" max="15" value="5">
+                                <input type="number" id="image-duration" name="duration" min="1" max="30" value="5">
                             </div>
                             <button id="set-image" onclick="setImage()" disabled>Set Image</button>
                         </div>
@@ -231,11 +232,13 @@
                     image_id: imageId+1n,
                     filename: imageFilename,
                 }
+                imageObject.image_id = imageObject.image_id.toString();
                 if (imageDiv.classList.contains('selected')) {
                     imageDiv.classList.remove('selected');
-                    selectedImages = selectedImages.filter(image => image.id !== imageId+1n);
+                    selectedImages = selectedImages.filter(image => image.image_id !== imageId+1n);
                 } else {
                     imageDiv.classList.add('selected');
+                    console.log(imageObject);
                     selectedImages.push(imageObject);
                 }
             }
@@ -245,10 +248,11 @@
                     audio_id: audioId+1n,
                     filename: audioFilename,
                 }
+                audioObject.audio_id = audioObject.audio_id.toString();
                 audioDiv = audioBtn.parentElement;
                 if (audioDiv.classList.contains('selected')) {
                     audioDiv.classList.remove('selected');
-                    selectedAudios = selectedAudios.filter(audio => audio.id !== audioId+1n);
+                    selectedAudios = selectedAudios.filter(audio => audio.audio_id !== audioId+1n);
                 } else {
                     audioDiv.classList.add('selected');
                     selectedAudios.push(audioObject);
@@ -303,7 +307,9 @@
                     imageDiv.classList.add('timeline-image');
                     imageDiv.setAttribute('onclick', 'addImageProperties(this)');
                     imageDiv.setAttribute('for', imgcnt);
-                    var imageUrl = getImageUrlPattern.replace('__ID__', image.id);
+                    var imageUrl = getImageUrlPattern.replace('__ID__', image.image_id);
+                    console.log(image)
+                    console.log(imageUrl);
                     imageDiv.innerHTML = `<img src="${imageUrl}" alt="image" name="${imgcnt}">`;
                     console.log(imageUrl);
                     imgcnt++;
@@ -344,7 +350,7 @@
                 preview.innerHTML = '';
 
                 imageIndex = imageToSetDiv.getAttribute('for');
-                var imageUrl = getImageUrlPattern.replace('__ID__', timelineImages[imageIndex].id);
+                var imageUrl = getImageUrlPattern.replace('__ID__', timelineImages[imageIndex].image_id);
                 var image = document.createElement('img');
                 image.src = imageUrl;
                 preview.appendChild(image);
@@ -363,7 +369,7 @@
                 audioIndex = audioToSet.getAttribute('name');
                 var audio = document.createElement('audio');
                 audio.controls = true;
-                audio.src = getAudioUrlPattern.replace('__ID__', timelineAudios[audioIndex].id);
+                audio.src = getAudioUrlPattern.replace('__ID__', timelineAudios[audioIndex].audio_id);
                 preview.appendChild(audio);
             }
 
@@ -407,6 +413,13 @@
 
                 var projectName = document.getElementById('project-name').value;
 
+                if(timelineImages.length == 0){
+                    timelineImages = []
+                }
+                if(timelineAudios.length == 0){
+                    timelineAudios = []
+                }
+
                 var jsonObjectToSend = {
                     'info': {
                         'title': projectName,
@@ -445,6 +458,13 @@
                     resolution = [640, 360];
                 } else {
                     resolution = [1280, 720];
+                }
+
+                if(timelineImages.length == 0){
+                    timelineImages = []
+                }
+                if(timelineAudios.length == 0){
+                    timelineAudios = []
                 }
 
                 var jsonObjectToSend = {
