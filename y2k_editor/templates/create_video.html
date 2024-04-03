@@ -22,7 +22,7 @@
                     <i  id="sidebar-btn" class='bx bxs-chevrons-right'></i>
                 </button>
                 <li class="sidebar-nav-item">
-                    <a href={{ url_for('user_dashboard', username=username) }}>
+                    <a href={{ url_for('user_dashboard') }}>
                         <i class='bx bx-home-alt-2' ></i>
                         <span class="nav-text">Dashboard</span>
                     </a>
@@ -229,13 +229,13 @@
 
             function selectImage(imageDiv, imageId, imageFilename) {
                 var imageObject = {
-                    image_id: imageId+1n,
+                    image_id: imageId,
                     filename: imageFilename,
                 }
                 imageObject.image_id = imageObject.image_id.toString();
                 if (imageDiv.classList.contains('selected')) {
                     imageDiv.classList.remove('selected');
-                    selectedImages = selectedImages.filter(image => image.image_id !== imageId+1n);
+                    selectedImages = selectedImages.filter(image => image.image_id != imageId);
                 } else {
                     imageDiv.classList.add('selected');
                     console.log(imageObject);
@@ -245,14 +245,14 @@
 
             function selectAudio(audioBtn, audioId, audioFilename) {
                 var audioObject = {
-                    audio_id: audioId+1n,
+                    audio_id: audioId,
                     filename: audioFilename,
                 }
                 audioObject.audio_id = audioObject.audio_id.toString();
                 audioDiv = audioBtn.parentElement;
                 if (audioDiv.classList.contains('selected')) {
                     audioDiv.classList.remove('selected');
-                    selectedAudios = selectedAudios.filter(audio => audio.audio_id !== audioId+1n);
+                    selectedAudios = selectedAudios.filter(audio => audio.audio_id != audioId);
                 } else {
                     audioDiv.classList.add('selected');
                     selectedAudios.push(audioObject);
@@ -427,9 +427,9 @@
                         'framerate': 12
                     },
                     'video': {
-                        'images': timelineImages,
-                        'audios': timelineAudios,
-                    }
+                        'images': timelineImages
+                    },
+                    'audios': timelineAudios
                 }
 
                 $.ajax({

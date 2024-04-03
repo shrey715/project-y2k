@@ -21,7 +21,7 @@
                     <i  id="sidebar-btn" class='bx bxs-chevrons-right'></i>
                 </button>
                 <li class="sidebar-nav-item">
-                    <a href={{ url_for('user_dashboard', username=username) }}>
+                    <a href={{ url_for('user_dashboard') }}>
                         <i class='bx bx-home-alt-2' ></i>
                         <span class="nav-text">Dashboard</span>
                     </a>
@@ -90,8 +90,8 @@
                     {% for image in images %}
                         <div class="image-container" id="image-{{ image['id'] }}">
                             <img src="{{ url_for('get_image',image_id=image['id']) }}" alt="image" data-filename="{{ image['filename'] }}">
-                            <input type="checkbox" id="checkbox-{{ image['id'] }}" class="image-checkbox" data-image-id="{{ image['id'] }}">
-                            <label for="checkbox-{{ image['id'] }}"></label>
+                            <input type="checkbox" id="image-checkbox-{{ image['id'] }}" class="image-checkbox" data-image-id="{{ image['id'] }}">
+                            <label for="image-checkbox-{{ image['id'] }}"></label>
                         </div>
                     {% endfor %}
                 </div>
@@ -105,8 +105,8 @@
                                 <source src="{{ url_for('get_audio',audio_id=audio['id']) }}" type="audio/mpeg">
                                 Your browser does not support the audio element.
                             </audio>
-                            <input type="checkbox" id="checkbox-{{ audio['id'] }}" class="audio-checkbox" data-image-id="{{ audio['id'] }}">
-                            <label for="checkbox-{{ audio['id'] }}"></label>
+                            <input type="checkbox" id="audio-checkbox-{{ audio['id'] }}" class="audio-checkbox" data-image-id="{{ audio['id'] }}">
+                            <label for="audio-checkbox-{{ audio['id'] }}"></label>
                         </div>
                     {% endfor %}
                 </div>
@@ -121,8 +121,8 @@
                                 <source src="{{ url_for('get_audio',audio_id=audio['id']) }}" type="audio/mpeg">
                                 Your browser does not support the audio element.
                             </audio>
-                            <input type="checkbox" id="checkbox-{{ audio['id'] }}" class="audio-checkbox" data-audio-id="{{ audio['id'] }}">
-                            <label for="checkbox-{{ audio['id'] }}"></label>
+                            <input type="checkbox" id="audio-checkbox-{{ audio['id'] }}" class="audio-checkbox" data-audio-id="{{ audio['id'] }}">
+                            <label for="audio-checkbox-{{ audio['id'] }}"></label>
                         </div>
                     {% endfor %}
                 </div>
