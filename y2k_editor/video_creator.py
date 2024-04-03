@@ -1,14 +1,10 @@
-from pathlib import Path
 import cv2
-from moviepy.editor import VideoFileClip, AudioFileClip, ImageClip, ColorClip, CompositeVideoClip, AudioClip
+from moviepy.editor import VideoFileClip, AudioFileClip, ImageClip, AudioClip
 import numpy as np
-from PIL import Image
 from moviepy.video.fx import all as vfx
 from moviepy.editor import concatenate_videoclips
 import subprocess
 import os
-import tempfile
-import ffmpeg
 
 def create_transition(input_video1, input_video2, transition, output_video, duration, offset):
     print("cr8 trns")
@@ -129,6 +125,8 @@ def renderVideo(image_list, audio , durations, transitions, quality, fps):
     
     return video
 
+
+"""
 if __name__ == '__main__':
     imagenames = [
         'test/img1.png',
@@ -158,3 +156,4 @@ if __name__ == '__main__':
     
     with open('temp/meravideo.mp4', 'wb') as f:
         f.write(output)
+# """

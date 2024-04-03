@@ -5,17 +5,14 @@ from datetime import timedelta
 from flask_cors import CORS
 from flask_wtf.csrf import CSRFProtect
 from werkzeug.utils import secure_filename
-#from urllib.parse import quote_plus as _parse_quote_plus
-#import pymysql  
 import hashlib
 import os
 import glob
 import json
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 from sqlalchemy import select, func, and_
-import sqlalchemy_cockroachdb
 from y2k_editor.video_creator import renderVideo
-load_dotenv()
+# load_dotenv()
 
 app=Flask(__name__)
 app.config["JWT_TOKEN_LOCATION"] = ["headers", "cookies", "json", "query_string"]
@@ -30,13 +27,13 @@ app.config['SESSION_COOKIE_SECURE'] = True
 jwt = JWTManager(app)
 csrf = CSRFProtect(app)
 CORS(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URI")
 db = SQLAlchemy(app)
 
 from y2k_editor.models import User, Audio, Image, DBProject
 with app.app_context():
     db.create_all()
-    
+
 def initPreloadedLibrary():
     directory = 'static/audio/preloaded'
     audio_files = glob.glob(os.path.join(directory, '*.mp3'))
@@ -118,7 +115,7 @@ def login():
     if cookie:
         current_user = decode_token(cookie)['sub']
         if checkUserExists(username=current_user):
-            return redirect(url_for('user_dashboard', username=current_user))
+            return redirect(url_for('user_dashboard'))
         else:
             return redirect('/logout')
     if request.method == 'POST':
@@ -497,8 +494,8 @@ def render_video():
     
     audio = None
     if 'audios' in vid_details and vid_details['audios']:
-        audio_det = vid_details['audios'][0]['audio_id']
-        audio = db.session.query(Audio).filter(Audio.id == audio_det['audio_id']).one_or_none()
+        audio_id = int(vid_details['audios'][0]['audio_id'])
+        audio = db.session.query(Audio).filter(Audio.id == audio_id).one_or_none()
         audio = audio.audio
     
     output_video = renderVideo(images, audio, image_durations, transitions, resolution, fps)
