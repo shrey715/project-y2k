@@ -78,13 +78,18 @@
                     <thead>
                         <tr>
                             <th>Image ID</th>
-                            <th>Image</th>
                             <th>File Name</th>
                             <th>User ID</th>
                         </tr>
                     </thead>
                     <tbody>
-                        
+                        {% for image in images %}
+                        <tr>
+                            <td>{{ image.id }}</td>
+                            <td>{{ image.filename }}</td>
+                            <td>{{ image.user_id }}</td>
+                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
@@ -94,13 +99,18 @@
                     <thead>
                         <tr>
                             <th>Audio ID</th>
-                            <th>Audio</th>
                             <th>File Name</th>
                             <th>User ID</th>
                         </tr>
                     </thead>
                     <tbody>
-                        
+                        {% for audio in audios %}
+                        <tr>
+                            <td>{{ audio.id }}</td>
+                            <td>{{ audio.filename }}</td>
+                            <td>{{ audio.user_id }}</td>
+                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
