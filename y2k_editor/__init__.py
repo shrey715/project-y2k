@@ -9,10 +9,21 @@ import hashlib
 import os
 import glob
 import json
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 from sqlalchemy import select, func, and_
 from y2k_editor.video_creator import renderVideo
-# load_dotenv()
+import getpass
+
+try:
+    with open('.env', 'r') as f:
+        pass
+except FileNotFoundError:
+    with open('.env', 'w') as f:
+        username = input("Enter your database username: ")
+        password = getpass.getpass("Enter your database password: ")
+        f.write(f"DATABASE_URI=mysql+pymysql://{username}:{password}@localhost/y2k_editor")
+
+load_dotenv()
 
 app=Flask(__name__)
 app.config["JWT_TOKEN_LOCATION"] = ["headers", "cookies", "json", "query_string"]
