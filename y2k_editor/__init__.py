@@ -13,16 +13,21 @@ from dotenv import load_dotenv
 from sqlalchemy import select, func, and_
 from y2k_editor.video_creator import renderVideo
 import getpass
+from urllib.parse import quote
 
 try:
     with open('.env', 'r') as f:
         pass
 except FileNotFoundError:
-    with open('.env', 'w') as f:
-        username = input("Enter your database username: ")
-        password = getpass.getpass("Enter your database password: ")
-        f.write(f"DATABASE_URI=mysql+pymysql://{username}:{password}@localhost/y2k_editor")
-
+    try:
+        with open('.env', 'w') as f:
+            username = input("Enter your database username: ")
+            password = getpass.getpass("Enter your database password: ")
+            password = quote(password)
+            f.write(f"DATABASE_URI=mysql+pymysql://{username}:{password}@localhost/y2k_editor")
+    except Exception as e:
+        print(f"Error: {e}")
+        os.remove('.env')
 load_dotenv()
 
 app=Flask(__name__)
