@@ -1,23 +1,44 @@
-# Ignore virtual environment
-.venv/
-
-# Ignore VS Code settings
-.vscode/
-
-# Ignore Python cache files
+# Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
-*.pyc.so
-
-# Ignore Python distribution artifacts
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+env/
+*.egg-info/
 dist/
 build/
-*.egg-info/
 
-# Ignore Python environments
+# Environment
+.env
 
-# Ignore Jupyter Notebook
-.ipynb_checkpoints/
+# Node.js
+node_modules/
+npm-debug.log*
 
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temp files
+temp/
+*.tmp
+*.temp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# SSL certificates (keep in repo if needed, but not secrets)
+ssl/*.key
+
+# Test files
+test/
+
+# Legacy (kept for reference but not tracked)
+# legacy/

@@ -1,0 +1,609 @@
+/* ============================================/*
+ * Y2K VIDEO EDITOR - 90s ARCADE THEME
+ * Authentic arcade machine aesthetic
+ */
+
+/* ========================================
+   FONTS - Pixel/Arcade style
+   ======================================== */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
+
+/* ========================================
+   CSS CUSTOM PROPERTIES - Design Tokens
+   ======================================== */
+:root {
+    /* ---- Refined Retro Colors ---- */
+    --arcade-black: #0a0a0f;
+    --arcade-dark: #12121a;
+    --arcade-blue: #1a1a28;
+    --arcade-purple: #1e1e2e;
+
+    /* Neon Accents - Softened for cohesion */
+    --neon-cyan: #40e0d0;
+    /* Softer teal */
+    --neon-pink: #e066a0;
+    /* Softer pink */
+    --neon-yellow: #f0c040;
+    /* Warmer yellow */
+    --neon-green: #50c878;
+    /* Softer green */
+    --neon-red: #e05050;
+    /* Softer red */
+    --neon-orange: #e08050;
+    /* Softer orange */
+
+    /* Background layers */
+    --bg-dark: #0a0a0f;
+    --bg-secondary: #12121a;
+    --bg-tertiary: #1a1a28;
+    --bg-elevated: #22222e;
+
+    /* Text */
+    --text-primary: #e8e8f0;
+    --text-secondary: #9090a8;
+    --text-muted: #505068;
+
+    /* Accent gradients - Softer */
+    --gradient-arcade: linear-gradient(135deg, #e066a0, #40e0d0);
+    --gradient-primary: linear-gradient(135deg, #40e0d0, #e066a0);
+    --gradient-fire: linear-gradient(135deg, #e05050, #e08050);
+    --gradient-electric: linear-gradient(135deg, #50c878, #40e0d0);
+
+    /* Typography - Pixel fonts */
+    --font-arcade: 'Press Start 2P', monospace;
+    --font-display: 'VT323', monospace;
+    --font-body: 'VT323', monospace;
+    --font-mono: 'VT323', monospace;
+
+    /* Spacing */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+
+    /* Border radius - Slightly softer */
+    --radius-sm: 2px;
+    --radius-md: 4px;
+    --radius-lg: 6px;
+    --radius-xl: 8px;
+    --radius-full: 50%;
+
+    /* Borders - Reduced thickness */
+    --border-arcade: 2px solid;
+    --border-thick: 3px solid;
+    --border-subtle: 1px solid rgba(255, 255, 255, 0.08);
+
+    /* Shadows - Softer glows */
+    --shadow-cyan: 0 0 8px rgba(64, 224, 208, 0.4), 0 0 16px rgba(64, 224, 208, 0.2);
+    --shadow-pink: 0 0 8px rgba(224, 102, 160, 0.4), 0 0 16px rgba(224, 102, 160, 0.2);
+    --shadow-yellow: 0 0 8px rgba(240, 192, 64, 0.4);
+    --shadow-glow-cyan: 0 0 12px rgba(64, 224, 208, 0.3);
+    --shadow-glow-pink: 0 0 12px rgba(224, 102, 160, 0.3);
+
+    /* Transitions */
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.25s ease;
+}
+
+/* ========================================
+   RESET & BASE STYLES
+   ======================================== */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 16px;
+    -webkit-font-smoothing: none;
+    /* Crisp pixels */
+    -moz-osx-font-smoothing: auto;
+    image-rendering: pixelated;
+}
+
+body {
+    font-family: var(--font-body);
+    font-size: 1.25rem;
+    line-height: 1.6;
+    color: var(--text-primary);
+    background-color: var(--bg-dark);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* CRT Scanline overlay - subtle */
+body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg,
+            rgba(0, 0, 0, 0.03) 0px,
+            rgba(0, 0, 0, 0.03) 1px,
+            transparent 1px,
+            transparent 3px);
+    pointer-events: none;
+    z-index: 9999;
+}
+
+/* ========================================
+   TYPOGRAPHY
+   ======================================== */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--font-arcade);
+    font-weight: 400;
+    line-height: 1.4;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+h1 {
+    font-size: 1.25rem;
+    text-shadow: 2px 2px 0 rgba(224, 102, 160, 0.5);
+}
+
+h2 {
+    font-size: 1rem;
+}
+
+h3 {
+    font-size: 0.875rem;
+}
+
+p {
+    color: var(--text-secondary);
+    font-size: 1.25rem;
+}
+
+a {
+    color: var(--neon-cyan);
+    text-decoration: none;
+    transition: var(--transition-fast);
+}
+
+a:hover {
+    color: var(--neon-yellow);
+    text-shadow: var(--shadow-yellow);
+}
+
+/* ========================================
+   SCROLLBAR - Chunky arcade style
+   ======================================== */
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-dark);
+    border: 2px solid var(--neon-cyan);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--neon-cyan);
+    border: 2px solid var(--bg-dark);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--neon-pink);
+}
+
+/* ========================================
+   SELECTION
+   ======================================== */
+::selection {
+    background: var(--neon-pink);
+    color: var(--bg-dark);
+}
+
+/* ========================================
+   FOCUS STATES - High visibility
+   ======================================== */
+:focus {
+    outline: 3px solid var(--neon-yellow);
+    outline-offset: 2px;
+}
+
+:focus:not(:focus-visible) {
+    outline: none;
+}
+
+:focus-visible {
+    outline: 3px solid var(--neon-yellow);
+    outline-offset: 2px;
+}
+
+/* ========================================
+   ARCADE ANIMATIONS
+   ======================================== */
+@keyframes blink {
+
+    0%,
+    50% {
+        opacity: 1;
+    }
+
+    51%,
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes flicker {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    92% {
+        opacity: 0.8;
+    }
+
+    94% {
+        opacity: 1;
+    }
+
+    97% {
+        opacity: 0.9;
+    }
+}
+
+@keyframes pulse-glow {
+
+    0%,
+    100% {
+        filter: brightness(1);
+        text-shadow: 0 0 10px currentColor;
+    }
+
+    50% {
+        filter: brightness(1.3);
+        text-shadow: 0 0 20px currentColor, 0 0 40px currentColor;
+    }
+}
+
+@keyframes rainbow {
+    0% {
+        color: var(--neon-red);
+    }
+
+    16% {
+        color: var(--neon-orange);
+    }
+
+    33% {
+        color: var(--neon-yellow);
+    }
+
+    50% {
+        color: var(--neon-green);
+    }
+
+    66% {
+        color: var(--neon-cyan);
+    }
+
+    83% {
+        color: var(--neon-pink);
+    }
+
+    100% {
+        color: var(--neon-red);
+    }
+}
+
+@keyframes scanline {
+    0% {
+        transform: translateY(-100%);
+    }
+
+    100% {
+        transform: translateY(100vh);
+    }
+}
+
+@keyframes float-pixel {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
+.text-arcade {
+    font-family: var(--font-arcade);
+}
+
+.text-display {
+    font-family: var(--font-display);
+}
+
+.text-glow-cyan {
+    color: var(--neon-cyan);
+    text-shadow: var(--shadow-cyan);
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.text-glow-pink {
+    color: var(--neon-pink);
+    text-shadow: var(--shadow-pink);
+}
+
+.text-rainbow {
+    animation: rainbow 3s linear infinite;
+}
+
+.text-blink {
+    animation: blink 1s step-end infinite;
+}
+
+/* Arcade borders */
+.border-arcade {
+    border: var(--border-arcade) var(--neon-cyan);
+    box-shadow:
+        inset 0 0 20px rgba(0, 255, 255, 0.1),
+        0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+.border-pink {
+    border: var(--border-arcade) var(--neon-pink);
+    box-shadow:
+        inset 0 0 20px rgba(255, 0, 255, 0.1),
+        0 0 10px rgba(255, 0, 255, 0.3);
+}
+
+/* Arcade button base */
+.arcade-btn {
+    font-family: var(--font-arcade);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    padding: var(--space-md) var(--space-lg);
+    border: var(--border-thick) var(--neon-cyan);
+    background: var(--bg-secondary);
+    color: var(--neon-cyan);
+    cursor: pointer;
+    position: relative;
+    transition: var(--transition-fast);
+}
+
+.arcade-btn::before {
+    content: '>';
+    position: absolute;
+    left: 8px;
+    opacity: 0;
+    transition: var(--transition-fast);
+}
+
+.arcade-btn:hover {
+    background: var(--neon-cyan);
+    color: var(--bg-dark);
+    box-shadow: var(--shadow-cyan);
+    transform: scale(1.02);
+}
+
+.arcade-btn:hover::before {
+    opacity: 1;
+}
+
+.arcade-btn:active {
+    transform: scale(0.98);
+}
+
+/* Pixel corners decoration */
+.pixel-corners {
+    position: relative;
+}
+
+.pixel-corners::before,
+.pixel-corners::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: var(--neon-cyan);
+}
+
+.pixel-corners::before {
+    top: -4px;
+    left: -4px;
+}
+
+.pixel-corners::after {
+    bottom: -4px;
+    right: -4px;
+}
+
+/* High score style numbers */
+.score-display {
+    font-family: var(--font-arcade);
+    font-size: 1.5rem;
+    color: var(--neon-yellow);
+    text-shadow: var(--shadow-yellow);
+    letter-spacing: 4px;
+}
+
+/* INSERT COIN text */
+.insert-coin {
+    font-family: var(--font-arcade);
+    font-size: 0.75rem;
+    color: var(--neon-yellow);
+    text-transform: uppercase;
+    animation: blink 1s step-end infinite;
+    text-align: center;
+}
+
+/* Screen flicker effect for containers */
+.crt-flicker {
+    animation: flicker 4s linear infinite;
+}
+
+
+.glow-text {
+    text-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
+    background: rgba(18, 18, 26, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: var(--border-subtle);
+}
+
+/* ============================================
+   Animations
+   ============================================ */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes glow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 5px var(--neon-cyan), 0 0 10px var(--neon-cyan);
+    }
+
+    50% {
+        box-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan), 0 0 30px var(--neon-cyan);
+    }
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* ============================================
+   Scanlines (subtle CRT effect)
+   ============================================ */
+.scanlines::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background: repeating-linear-gradient(transparent 0px,
+            transparent 2px,
+            rgba(0, 0, 0, 0.03) 2px,
+            rgba(0, 0, 0, 0.03) 4px);
+    z-index: 9999;
+}
+
+/* ============================================
+   Particles Container
+   ============================================ */
+.particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: var(--neon-cyan);
+    border-radius: var(--radius-full);
+    opacity: 0.4;
+    animation: float 6s ease-in-out infinite;
+}
+
+.particle:nth-child(even) {
+    background: var(--neon-pink);
+    animation-delay: -3s;
+}
