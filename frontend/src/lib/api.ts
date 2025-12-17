@@ -1,4 +1,5 @@
-const API_BASE = '';
+// Use environment variable for production backend URL
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 interface ApiOptions {
     method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
