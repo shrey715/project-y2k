@@ -1,5 +1,5 @@
-// Use environment variable for production backend URL
-const API_BASE = import.meta.env.VITE_API_URL || '';
+// Use environment variable for production backend URL (remove trailing slash)
+const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
 
 interface ApiOptions {
     method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
