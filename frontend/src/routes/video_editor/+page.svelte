@@ -124,7 +124,7 @@
             };
             const result = await videoApi.render(data);
             if (result.success) {
-                previewUrl = '/api/video/view?t=' + Date.now();
+                previewUrl = videoApi.getViewUrl() + '?t=' + Date.now();
             } else {
                 alert('Render failed: ' + (result.detail || result.message));
             }
