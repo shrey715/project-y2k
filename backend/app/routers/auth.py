@@ -48,14 +48,15 @@ def login(
         expires_delta=timedelta(hours=24)
     )
     
-    # Set HTTP-only cookie
+    # Set HTTP-only cookie (cross-origin compatible)
     response.set_cookie(
         key="access_token_cookie",
         value=access_token,
         max_age=86400,
         httponly=True,
         path="/",
-        samesite="lax"
+        samesite="none",
+        secure=True
     )
     
     return MessageResponse(status="success", message="Login successful")
@@ -107,14 +108,15 @@ def signup(
         expires_delta=timedelta(days=7)
     )
     
-    # Set HTTP-only cookie
+    # Set HTTP-only cookie (cross-origin compatible)
     response.set_cookie(
         key="access_token_cookie",
         value=access_token,
         max_age=86400,
         httponly=True,
         path="/",
-        samesite="lax"
+        samesite="none",
+        secure=True
     )
     
     return MessageResponse(status="success", message="Signup successful")
@@ -123,7 +125,12 @@ def signup(
 @router.get("/logout", response_model=MessageResponse)
 def logout(response: Response):
     """Logout user by deleting JWT cookie."""
-    response.delete_cookie(key="access_token_cookie", path="/")
+    response.delete_cookie(
+        key="access_token_cookie", 
+        path="/",
+        samesite="none",
+        secure=True
+    )
     return MessageResponse(status="success", message="Logged out successfully")
 
 
