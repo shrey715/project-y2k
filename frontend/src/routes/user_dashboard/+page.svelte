@@ -5,6 +5,7 @@
     import Button from '$lib/components/Button.svelte';
     import { usersApi, mediaApi } from '$lib/api';
     import { goto } from '$app/navigation';
+    import { toasts } from '$lib/stores/toasts';
 
     interface MediaItem {
         id: number;
@@ -65,7 +66,7 @@
             selectedImageIds.clear();
             selectedImageIds = selectedImageIds;
         } catch (e) {
-            alert('Failed to delete images');
+            toasts.show('Failed to delete images', 'error');
         }
     }
 
@@ -77,7 +78,7 @@
             selectedAudioIds.clear();
             selectedAudioIds = selectedAudioIds;
         } catch (e) {
-            alert('Failed to delete audios');
+            toasts.show('Failed to delete audios', 'error');
         }
     }
 
@@ -525,10 +526,12 @@
     }
 
     .audio-card {
+        position: relative;
         display: flex;
         align-items: center;
         gap: var(--space-md);
         padding: var(--space-md);
+        padding-right: 50px; /* Space for select button */
         background: var(--bg-secondary);
         border: var(--border-subtle);
         border-radius: var(--radius-lg);

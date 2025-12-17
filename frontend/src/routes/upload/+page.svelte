@@ -4,6 +4,7 @@
     import Button from '$lib/components/Button.svelte';
     import { goto } from '$app/navigation';
     import { mediaApi } from '$lib/api';
+    import { toasts } from '$lib/stores/toasts';
 
     let imageFiles: File[] = [];
     let audioFiles: File[] = [];
@@ -60,9 +61,9 @@
             imageFiles.forEach(f => fileList.items.add(f));
             await mediaApi.uploadFiles(fileList.files, 'image');
             imageFiles = [];
-            alert('Images uploaded successfully!');
+            toasts.show('Images uploaded successfully!', 'success');
         } catch (e) {
-            alert('Failed to upload images');
+            toasts.show('Failed to upload images', 'error');
         } finally {
             uploadingImages = false;
         }
@@ -76,9 +77,9 @@
             audioFiles.forEach(f => fileList.items.add(f));
             await mediaApi.uploadFiles(fileList.files, 'audio');
             audioFiles = [];
-            alert('Audio files uploaded successfully!');
+            toasts.show('Audio files uploaded successfully!', 'success');
         } catch (e) {
-            alert('Failed to upload audio files');
+            toasts.show('Failed to upload audio files', 'error');
         } finally {
             uploadingAudios = false;
         }

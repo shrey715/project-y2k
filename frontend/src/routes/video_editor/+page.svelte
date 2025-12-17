@@ -7,6 +7,7 @@
     import Input from '$lib/components/Input.svelte';
     import Select from '$lib/components/Select.svelte';
     import { videoApi, mediaApi } from '$lib/api';
+    import { toasts } from '$lib/stores/toasts';
 
     interface ImageItem { id: number; filename: string; }
     interface AudioItem { id: number; filename: string; }
@@ -126,10 +127,10 @@
             if (result.success) {
                 previewUrl = videoApi.getViewUrl() + '?t=' + Date.now();
             } else {
-                alert('Render failed: ' + (result.detail || result.message));
+                toasts.show('Render failed: ' + (result.detail || result.message), 'error');
             }
         } catch (e) {
-            alert('Error rendering video');
+            toasts.show('Error rendering video', 'error');
         } finally {
             rendering = false;
         }
@@ -157,16 +158,17 @@
             const result = await videoApi.render(data);
             if (result.success) {
                 const a = document.createElement('a');
-                a.href = '/api/video/view';
+                a.href = videoApi.getViewUrl();
                 a.download = (projectName || 'video') + '.mp4';
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
+                toasts.show('Video exported successfully!', 'success');
             } else {
-                alert('Export failed: ' + (result.detail || result.message));
+                toasts.show('Export failed: ' + (result.detail || result.message), 'error');
             }
         } catch (e) {
-            alert('Error exporting video');
+            toasts.show('Error exporting video', 'error');
         } finally {
             rendering = false;
         }

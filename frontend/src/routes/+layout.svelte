@@ -3,6 +3,7 @@
     import { auth } from '$lib/stores/auth';
     import { goto } from '$app/navigation';
     import { page } from '$app/stores';
+    import Toast from '$lib/components/Toast.svelte';
     import '../app.css';
 
     const publicRoutes = ['/', '/login', '/signup'];
@@ -19,4 +20,5 @@
     }
 </script>
 
+<Toast />
 <slot />
