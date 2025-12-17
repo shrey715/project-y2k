@@ -105,7 +105,7 @@
 
     async function previewVideo() {
         if (timelineImages.length === 0) {
-            alert('Add at least one image to the timeline');
+            toasts.show('Add at least one image to the timeline', 'warning');
             return;
         }
         rendering = true;
@@ -138,7 +138,7 @@
 
     async function exportVideo() {
         if (timelineImages.length === 0) {
-            alert('Add at least one image to the timeline');
+            toasts.show('Add at least one image to the timeline', 'warning');
             return;
         }
         rendering = true;
@@ -157,12 +157,18 @@
             };
             const result = await videoApi.render(data);
             if (result.success) {
+                // Fetch the video as a blob for cross-origin download
+                const response = await fetch(videoApi.getViewUrl(), { credentials: 'include' });
+                if (!response.ok) throw new Error('Failed to download video');
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
-                a.href = videoApi.getViewUrl();
+                a.href = url;
                 a.download = (projectName || 'video') + '.mp4';
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
+                URL.revokeObjectURL(url);
                 toasts.show('Video exported successfully!', 'success');
             } else {
                 toasts.show('Export failed: ' + (result.detail || result.message), 'error');
