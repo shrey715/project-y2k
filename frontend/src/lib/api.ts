@@ -47,7 +47,7 @@ export const authApi = {
             body: { username, email, password }
         }),
 
-    logout: () => fetch('/api/auth/logout', { credentials: 'include' }),
+    logout: () => fetch(`${API_BASE}/api/auth/logout`, { credentials: 'include' }),
 
     check: () => apiRequest<{ authenticated: boolean; username?: string }>('/api/auth/check')
 };
@@ -80,7 +80,7 @@ export const mediaApi = {
         Array.from(files).forEach(file => formData.append('files', file));
         formData.append('file_type', fileType);
 
-        const response = await fetch('/api/media/upload', {
+        const response = await fetch(`${API_BASE}/api/media/upload`, {
             method: 'POST',
             credentials: 'include',
             body: formData
@@ -94,19 +94,19 @@ export const mediaApi = {
     },
 
     deleteImages: (imageIds: number[]) =>
-        fetch(`/api/media/images?image_ids=${imageIds.join(',')}`, {
+        fetch(`${API_BASE}/api/media/images?image_ids=${imageIds.join(',')}`, {
             method: 'DELETE',
             credentials: 'include'
         }),
 
     deleteAudios: (audioIds: number[]) =>
-        fetch(`/api/media/audios?audio_ids=${audioIds.join(',')}`, {
+        fetch(`${API_BASE}/api/media/audios?audio_ids=${audioIds.join(',')}`, {
             method: 'DELETE',
             credentials: 'include'
         }),
 
-    getImageUrl: (id: number) => `/api/media/images/${id}`,
-    getAudioUrl: (id: number) => `/api/media/audios/${id}`
+    getImageUrl: (id: number) => `${API_BASE}/api/media/images/${id}`,
+    getAudioUrl: (id: number) => `${API_BASE}/api/media/audios/${id}`
 };
 
 // Video API
@@ -122,7 +122,7 @@ export const videoApi = {
         body: data
     }),
 
-    viewUrl: '/api/video/view'
+    getViewUrl: () => `${API_BASE}/api/video/view`
 };
 
 // Admin API
