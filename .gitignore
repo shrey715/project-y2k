@@ -42,3 +42,4 @@ test/
 
 # Legacy (kept for reference but not tracked)
 # legacy/
+.env
